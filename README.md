@@ -1,2 +1,2 @@
 # OCR
-- [Tesseract OCR Tutorial](Tesseract Tutorial)
+- [Tesseract OCR Tutorial](Tesseract_Tutorial)

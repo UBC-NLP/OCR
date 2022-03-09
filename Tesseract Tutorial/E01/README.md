@@ -7,4 +7,4 @@
  - Using Python wrapper (pytesseract).
  - Detect text from multilingaul image.
 
- # Notebok [open](E01/Tesseract_OCR_Tutorial_E01.ipynb)
+ ## E01's Notebook [open](Tesseract_OCR_Tutorial_E01.ipynb)

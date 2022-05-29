@@ -8,9 +8,18 @@ def read_image_file(example):
         return {"image": {"bytes": f.read()}}
 
 
-def get_dataset(root_dir, dataset_name, save_dir):
-    path = root_dir + "/" + dataset_name + "/" + dataset_name + '.tsv'
-    df = pd.read_csv(path, sep='\t')
+def get_dataset(root_dir, dataset_name, save_dir, test_split, specific_name):
+    if specific_name:
+        path = root_dir + "/" + dataset_name + "/" + specific_name + '.tsv'
+    else:
+        path = root_dir + "/" + dataset_name + "/" + dataset_name + '.tsv'
+    if test_split:
+        path1 = root_dir + "/" + dataset_name + "/" + dataset_name + '.tsv'
+        path2 = root_dir + "/" + dataset_name + "/" + test_split + '.tsv'
+        df = pd.read_csv(path1, sep='\t')
+        df += pd.read_csv(path2, sep='\t')
+    else:
+        df = pd.read_csv(path, sep='\t')
     df['file_name'] = '' + df['file_name']
     df = df.astype(str)
     dataset = Dataset.from_dict({"image": df['file_name'].to_list()}).cast_column("image", Image())
@@ -29,6 +38,8 @@ def get_dataset(root_dir, dataset_name, save_dir):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset_name", default="ocr", type=str)
+    parser.add_argument("--test_split", default="", type=str)
+    parser.add_argument("--specific_name", default="", type=str)
     parser.add_argument("--root_dir", default="data", type=str)
     parser.add_argument("--save_dir", default="data/ocr", type=str)
     args = parser.parse_args()

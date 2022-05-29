@@ -12,6 +12,12 @@ source activate ENV39_hug
 
 ################
 
+module load gcc arrow
+module load python/3.8
+source ~/ENV38_default/bin/activate
+pip3 install pandas
+pip3 install datasets
+pip3 install argparse
 python3 /scratch/ahsang/dataset.py \
       --dataset_name MADBase \
       --train_split MADBase_Train \

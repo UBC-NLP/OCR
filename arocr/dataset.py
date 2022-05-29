@@ -44,4 +44,19 @@ if __name__ == "__main__":
     parser.add_argument("--root_dir", default="data", type=str)
     parser.add_argument("--save_dir", default="data/ocr", type=str)
     args = parser.parse_args()
-    print(args.root_dir, args.dataset_name, args.save_dir) 
+    print(
+        args.root_dir,
+        args.dataset_name,
+        args.save_dir,
+        args.train_split,
+        args.test_split,
+        args.specific_name
+    )
+    get_dataset(
+        args.root_dir,
+        args.dataset_name,
+        args.save_dir,
+        args.train_split,
+        args.test_split,
+        args.specific_name
+    )

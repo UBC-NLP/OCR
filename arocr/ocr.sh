@@ -22,6 +22,6 @@ python3 /scratch/ahsang/dataset.py \
       --dataset_name MADBase \
       --train_split MADBase_Train \
       --test_split MADBase_Test \
-      --root_dir /project/6007993/DataBank/OCR_data/Datasets/al/_Ready \
+      --root_dir ../../project/6007993/DataBank/OCR_data/Datasets/al/_Ready \
       --save_dir processed/
 

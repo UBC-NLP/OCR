@@ -45,6 +45,23 @@ class OCRDataset(Dataset):
         encoding = {"pixel_values": pixel_values.squeeze(), "labels": torch.tensor(labels)}
         return encoding
 
+def preprocess(examples, processor, max_target_length=128):
+    text = examples["text"][idx]
+        # prepare image (i.e. resize + normalize)
+    image = examples["image"][idx].convert("RGB")
+        # image = Image.open(self.root_dir + file_name).convert("RGB")
+    pixel_values = processor(image, return_tensors="pt").pixel_values
+        # add labels (input_ids) by encoding the text
+    labels = processor.tokenizer(
+            text, padding="max_length", max_length=max_target_length
+    ).input_ids
+        # important: make sure that PAD tokens are ignored by the loss function
+    labels = [
+            label if label != processor.tokenizer.pad_token_id else -100 for label in labels
+    ]
+    encoding = {"pixel_values": pixel_values.squeeze(), "labels": torch.tensor(labels)}
+    return encoding
+
 def main(args):
     encoder = args.ENCODER
     decoder = args.DECODER

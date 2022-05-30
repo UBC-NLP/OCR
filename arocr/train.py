@@ -46,9 +46,9 @@ class OCRDataset(Dataset):
         return encoding
 
 def preprocess(examples, processor, max_target_length=128):
-    text = examples["text"][idx]
+    text = examples["text"]
         # prepare image (i.e. resize + normalize)
-    image = examples["image"][idx].convert("RGB")
+    image = examples["image"].convert("RGB")
         # image = Image.open(self.root_dir + file_name).convert("RGB")
     pixel_values = processor(image, return_tensors="pt").pixel_values
         # add labels (input_ids) by encoding the text

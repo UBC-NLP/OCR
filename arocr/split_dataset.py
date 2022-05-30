@@ -5,6 +5,8 @@ from sklearn.model_selection import train_test_split
 def split_dataset(datset, file):
     print ("loading the data")
     df = pd.read_csv(file, sep="\t")
+    df.rename(columns={'file_name': 'image'}, inplace=True)
+
     df_train, df_dev_test =  train_test_split(df, test_size= 0.2, random_state=41)
     df_test, df_dev =  train_test_split(df_dev_test, test_size= 0.5, random_state=41)
     print ("saving the split")
@@ -15,5 +17,5 @@ def split_dataset(datset, file):
 
 
 print ("start")
-dataset_name="OnlineKhatt"
-split_dataset(dataset_name, "./data/{}/{}.tsv".format(dataset_name,dataset_name))
+for dataset_name in ['OnlineKhatt', 'ADAB', 'IDPL-PFOD', 'shotor', 'UPTI']:
+    split_dataset(dataset_name, "./data/{}/{}.tsv".format(dataset_name,dataset_name))

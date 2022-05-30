@@ -16,8 +16,9 @@ def get_dataset(root_dir, dataset_name, save_dir, train_split, test_split, speci
     if test_split:
         path1 = root_dir + "/" + dataset_name + "/" + train_split + '.tsv'
         path2 = root_dir + "/" + dataset_name + "/" + test_split + '.tsv'
-        df = pd.read_csv(path1, sep='\t')
-        df += pd.read_csv(path2, sep='\t')
+        df1 = pd.read_csv(path1, sep='\t')
+        df2 = pd.read_csv(path2, sep='\t')
+        df = pd.concat([df1,df2])
     else:
         df = pd.read_csv(path, sep='\t')
     df['file_name'] = '' + df['file_name']

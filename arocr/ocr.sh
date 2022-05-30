@@ -18,10 +18,10 @@ source ~/ENV38_default/bin/activate
 pip3 install pandas
 pip3 install datasets
 pip3 install argparse
-python3 /scratch/ahsang/dataset.py \
+python3 dataset.py \
       --dataset_name MADBase \
       --train_split MADBase_Train \
       --test_split MADBase_Test \
-      --root_dir project/6007993/DataBank/OCR_data/Datasets/al/_Ready \
-      --save_dir processed/
+      --root_dir $HOME/../../scratch/ahsang \
+      --save_dir /project/6007993/DataBank/OCR_data/Datasets/al/_Ready/processed/
 

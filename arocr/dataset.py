@@ -21,7 +21,7 @@ def get_dataset(root_dir, dataset_name, save_dir, train_split, test_split, speci
         df = pd.concat([df1, df2])
     else:
         df = pd.read_csv(path, sep='\t')
-    df['file_name'] = '' + df['file_name']
+    df['file_name'] = root_dir + "/" + dataset_name + "/Images/" + df['file_name']
     df = df.astype(str)
     dataset = Dataset.from_dict({"image": df['file_name'].to_list()}).cast_column("image", Image())
     dataset = dataset.add_column("text", df['text'].to_list())

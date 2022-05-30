@@ -12,10 +12,7 @@ from transformers import (
     default_data_collator,
 )
 import argparse
-import io
-import wandb
-from PIL import Image
-
+#import wandb
 
 
 class OCRDataset(Dataset):
@@ -33,7 +30,7 @@ class OCRDataset(Dataset):
         # file_name = self.df['file_name'][idx]
         text = self.df["text"][idx]
         # prepare image (i.e. resize + normalize)
-        image = Image.open(io.BytesIO(self.df["image"][idx])).convert("RGB")
+        image = self.df["image"][idx].convert("RGB")
         # image = Image.open(self.root_dir + file_name).convert("RGB")
         pixel_values = self.processor(image, return_tensors="pt").pixel_values
         # add labels (input_ids) by encoding the text
@@ -116,7 +113,7 @@ def main(args):
         weight_decay=0.005,
         learning_rate=3e-5,
         seed=42,
-        report_to="wandb",
+        #report_to="wandb",
     )
 
     cer_metric = load_metric("cer")

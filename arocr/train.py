@@ -12,6 +12,7 @@ from transformers import (
     default_data_collator,
 )
 import argparse
+import io
 
 
 class OCRDataset(Dataset):
@@ -29,7 +30,7 @@ class OCRDataset(Dataset):
         # file_name = self.df['file_name'][idx]
         text = self.df["text"][idx]
         # prepare image (i.e. resize + normalize)
-        image = self.df["image"][idx].convert("RGB")
+        image = Image.open(io.BytesIO(self.df["image"][idx])).convert("RGB")
         # image = Image.open(self.root_dir + file_name).convert("RGB")
         pixel_values = self.processor(image, return_tensors="pt").pixel_values
         # add labels (input_ids) by encoding the text
@@ -65,7 +66,8 @@ def main(args):
     # test_df1 = load_dataset(DATA_DIR, split="test")
 
     dataset_train = pd.DataFrame(train_df)
-    dataset_test = pd.DataFrame(valid_df)
+    dataset_valid = pd.DataFrame(valid_df)
+    dataset_test = pd.DataFrame(test_df)
 
     tokenizer = AutoTokenizer.from_pretrained(decoder)
 
@@ -73,7 +75,7 @@ def main(args):
 
     processor = TrOCRProcessor(feature_extractor, tokenizer)
     train_dataset = OCRDataset(root_dir="", df=dataset_train, processor=processor)
-    eval_dataset = OCRDataset(root_dir="", df=dataset_test, processor=processor)
+    eval_dataset = OCRDataset(root_dir="", df=dataset_valid, processor=processor)
 
     def model_init():
         model = VisionEncoderDecoderModel.from_encoder_decoder_pretrained(encoder, decoder)

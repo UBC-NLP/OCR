@@ -1,4 +1,4 @@
-from datasets import load_metric, Image, DatasetDict
+from datasets import load_metric, Image, DatasetDict, load_dataset
 import pandas as pd
 import torch
 from torch.utils.data import Dataset
@@ -53,10 +53,15 @@ def main(args):
 
     print(encoder, decoder, model_name, DATA_DIR)
 
-    df = get_dataset(DATA_DIR, DATASET)
-    train_df = df['train']
-    test_df = df['test']
-    valid_df = df['valid']
+    row_dataset = load_dataset("/project/6007993/DataBank/OCR_data/Datasets/al/_Ready/AraOCR_dataset", DATASET,
+                               cache_dir="./ocr_cache")
+
+    # df = get_dataset(DATA_DIR, DATASET)
+    # print(row_dataset)
+    train_df = row_dataset['train']
+    test_df = row_dataset['test']
+    valid_df = row_dataset['validation']
+    print(train_df[0])
     # test_df1 = load_dataset(DATA_DIR, split="test")
 
     dataset_train = pd.DataFrame(train_df)

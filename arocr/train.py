@@ -1,4 +1,4 @@
-from datasets import load_dataset, load_metric, Dataset, Image, DatasetDict
+from datasets import load_metric, Image, DatasetDict
 import pandas as pd
 import torch
 from torch.utils.data import Dataset
@@ -43,22 +43,6 @@ class OCRDataset(Dataset):
 
         encoding = {"pixel_values": pixel_values.squeeze(), "labels": torch.tensor(labels)}
         return encoding
-
-
-def get_dataset(root_dir, dataset_name):
-    df = pd.read_csv(root_dir + "/" + dataset_name + "/" + '.tsv', sep='\t')
-    df['file_name'] = '' + df['file_name']
-    df = df.astype(str)
-    dataset = Dataset.from_dict({"image": df['file_name'].to_list()}).cast_column("image", Image())
-    dataset = dataset.add_column("text", df['text'].to_list())
-    train_testvalid = dataset.train_test_split(test_size=0.2, seed=42)
-    test_valid = train_testvalid['test'].train_test_split(test_size=0.5, seed=42)
-    train_test_valid_dataset = DatasetDict({
-        'train': train_testvalid['train'],
-        'test': test_valid['test'],
-        'valid': test_valid['train']})
-    return train_test_valid_dataset
-
 
 def main(args):
     encoder = args.ENCODER

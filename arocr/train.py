@@ -1,4 +1,4 @@
-from datasets import load_metric, Image, DatasetDict, load_dataset
+from datasets import load_metric, DatasetDict, load_dataset
 import pandas as pd
 import torch
 from torch.utils.data import Dataset
@@ -13,6 +13,9 @@ from transformers import (
 )
 import argparse
 import io
+import wandb
+from PIL import Image
+
 
 
 class OCRDataset(Dataset):
@@ -113,6 +116,7 @@ def main(args):
         weight_decay=0.005,
         learning_rate=3e-5,
         seed=42,
+        report_to="wandb",
     )
 
     cer_metric = load_metric("cer")

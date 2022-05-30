@@ -7,9 +7,6 @@
 #SBATCH --mem-per-cpu=64G
 #SBATCH --account=def-mageed
 
-source ~/.bashrc
-source activate ENV39_hug
-
 ################
 
 module load gcc arrow

@@ -39,7 +39,7 @@ def get_dataset(root_dir, dataset_name, save_dir, train_split, test_split, speci
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset_name", default="ocr", type=str)
-    parser.add_argument("--train_split", default="ocr", type=str)
+    parser.add_argument("--train_split", default="", type=str)
     parser.add_argument("--test_split", default="", type=str)
     parser.add_argument("--specific_name", default="", type=str)
     parser.add_argument("--root_dir", default="data", type=str)

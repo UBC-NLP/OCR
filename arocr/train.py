@@ -266,11 +266,6 @@ def main():
         cache_dir=model_args.cache_dir,
     )
 
-    # df = get_dataset(DATA_DIR, DATASET)
-    # print(row_dataset)
-
-    # test_df1 = load_dataset(DATA_DIR, split="test")
-
     tokenizer = AutoTokenizer.from_pretrained(decoder)
 
     feature_extractor = AutoFeatureExtractor.from_pretrained(encoder)

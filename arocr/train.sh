@@ -16,7 +16,7 @@ module load gcc arrow
 module load cuda cudnn
 
 
-source ~/ENV38_default/bin/activate
+source ~/ocr/bin/activate
 pip3 install datasets
 pip3 install transformers 
 pip3 install torch

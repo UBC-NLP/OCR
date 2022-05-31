@@ -260,7 +260,7 @@ def main():
     model_name = model_args.model_name_or_path
     DATASET = data_args.dataset_name
 
-    print("Training/evaluation parameters %s" % training_args)
+    print(encoder, decoder, model_name, DATASET)
 
     dataset = load_dataset(
         "/project/6007993/DataBank/OCR_data/Datasets/al/_Ready/AraOCR_dataset",

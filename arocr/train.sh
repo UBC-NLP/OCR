@@ -30,7 +30,8 @@ python train.py \
     --model_name_or_path arocr  \
     --encoder_model_name_or_path facebook/deit-base-distilled-patch16-224 \
     --decoder_model_name_or_path xlm-roberta-base \
-    --dataset_name ADAB \
+    --dataset_name /project/6007993/DataBank/OCR_data/Datasets/al/_Ready/AraOCR_dataset \
+    --dataset_config_name ADAB \
     --save_dir ~/scratch/arocr/checkpoints/ \
     --output_dir ~/scratch/arocr/outputs/ \
     --cache_dir ~/scratch/arocr/cache/ \

@@ -263,8 +263,8 @@ def main():
     print(encoder, decoder, model_name, DATASET)
 
     dataset = load_dataset(
-        "/project/6007993/DataBank/OCR_data/Datasets/al/_Ready/AraOCR_dataset",
-        DATASET,
+        data_args.dataset_name,
+        data_args.dataset_config_name,
         cache_dir=model_args.cache_dir,
     )
 

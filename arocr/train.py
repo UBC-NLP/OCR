@@ -12,38 +12,9 @@ from transformers import (
     default_data_collator,
 )
 import argparse
-#import wandb
+import wandb
 
-
-class OCRDataset(Dataset):
-    def __init__(self, root_dir, df, processor, max_target_length=128):
-        self.root_dir = root_dir
-        self.df = df
-        self.processor = processor
-        self.max_target_length = max_target_length
-
-    def __len__(self):
-        return len(self.df)
-
-    def __getitem__(self, idx):
-        # get file name + text
-        # file_name = self.df['file_name'][idx]
-        text = self.df["text"][idx]
-        # prepare image (i.e. resize + normalize)
-        image = self.df["image"][idx].convert("RGB")
-        # image = Image.open(self.root_dir + file_name).convert("RGB")
-        pixel_values = self.processor(image, return_tensors="pt").pixel_values
-        # add labels (input_ids) by encoding the text
-        labels = self.processor.tokenizer(
-            text, padding="max_length", max_length=self.max_target_length
-        ).input_ids
-        # important: make sure that PAD tokens are ignored by the loss function
-        labels = [
-            label if label != self.processor.tokenizer.pad_token_id else -100 for label in labels
-        ]
-
-        encoding = {"pixel_values": pixel_values.squeeze(), "labels": torch.tensor(labels)}
-        return encoding
+wandb.init(project="arocr", entity="gagan3012")
 
 def preprocess(examples, processor, max_target_length=128):
     text = examples["text"]
@@ -71,28 +42,27 @@ def main(args):
 
     print(encoder, decoder, model_name, DATA_DIR)
 
-    row_dataset = load_dataset("/project/6007993/DataBank/OCR_data/Datasets/al/_Ready/AraOCR_dataset", DATASET,
+    dataset = load_dataset("/project/6007993/DataBank/OCR_data/Datasets/al/_Ready/AraOCR_dataset", DATASET,
                                cache_dir="./ocr_cache")
 
     # df = get_dataset(DATA_DIR, DATASET)
     # print(row_dataset)
-    train_df = row_dataset['train']
-    test_df = row_dataset['test']
-    valid_df = row_dataset['validation']
-    print(train_df[0])
+    
     # test_df1 = load_dataset(DATA_DIR, split="test")
-
-    dataset_train = pd.DataFrame(train_df)
-    dataset_valid = pd.DataFrame(valid_df)
-    dataset_test = pd.DataFrame(test_df)
 
     tokenizer = AutoTokenizer.from_pretrained(decoder)
 
     feature_extractor = AutoFeatureExtractor.from_pretrained(encoder)
 
     processor = TrOCRProcessor(feature_extractor, tokenizer)
-    train_dataset = OCRDataset(root_dir="", df=dataset_train, processor=processor)
-    eval_dataset = OCRDataset(root_dir="", df=dataset_valid, processor=processor)
+
+    dataset.map(preprocess,
+                processor=processor,
+                batched=True)
+    
+    train_dataset = dataset["train"]
+    test_dataset = dataset["test"]
+    eval_dataset = dataset["valid"]
 
     def model_init():
         model = VisionEncoderDecoderModel.from_encoder_decoder_pretrained(encoder, decoder)
@@ -130,7 +100,7 @@ def main(args):
         weight_decay=0.005,
         learning_rate=3e-5,
         seed=42,
-        #report_to="wandb",
+        report_to="wandb",
     )
 
     cer_metric = load_metric("cer")
@@ -158,7 +128,14 @@ def main(args):
         data_collator=default_data_collator,
     )
     trainer.train()
-    processor.save_pretrained(model_name, push_to_hub=True)
+    processor.save_pretrained(model_name)
+    trainer.create_model_card(model_name=model_name)
+    trainer.save_model(model_name)
+    predict_results = trainer.predict(
+            test_dataset, metric_key_prefix="cer"
+        )
+    metrics = predict_results.metrics
+    print(metrics)
 
 
 if __name__ == "__main__":

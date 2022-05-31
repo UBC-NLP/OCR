@@ -15,7 +15,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 import os
 
-wandb.init(project="arocr", entity="gagan3012")
+wandb.init(project="arocr", entity="gagan3012", settings=wandb.Settings(start_method="fork"))
 
 
 def preprocess(examples, processor, max_target_length=128):

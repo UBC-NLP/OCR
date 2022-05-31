@@ -15,7 +15,12 @@ module load scipy-stack
 module load gcc arrow
 module load cuda cudnn
 
-source arocr/bin/activate
+
+source ~/ENV38_default/bin/activate
+pip3 install datasets
+pip3 install transformers 
+pip3 install torch
+pip3 install wandb
 
 pwd
 

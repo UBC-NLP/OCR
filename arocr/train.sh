@@ -28,14 +28,16 @@ echo "Training started at $(date)"
 
 python train.py \
     --model_name_or_path arocr  
-    --encoder_model_name_or_path "facebook/deit-base-distilled-patch16-224"
-    --decoder_model_name_or_path "xlm-roberta-base"
-    --dataset_name "ADAB"
-    --save_dir arocr/OCR/arocr/checkpoints/
+    --encoder_model_name_or_path facebook/deit-base-distilled-patch16-224
+    --decoder_model_name_or_path xlm-roberta-base
+    --dataset_name ADAB
+    --save_dir ~/scratch/arocr/checkpoints/
+    --output_dir ~/scratch/arocr/outputs/
+    --cache_dir ~/scratch/arocr/cache/
     --do_train
     --do_eval
     --do_predict
-    --per_device_train_batch_size 8
+    --per_device_train_batch_size 1
     --per_device_eval_batch_size 8
     --seed 42
     --num_train_epochs 1

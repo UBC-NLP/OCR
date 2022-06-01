@@ -258,9 +258,8 @@ def main():
     encoder = model_args.encoder_model_name_or_path
     decoder = model_args.decoder_model_name_or_path
     model_name = model_args.model_name_or_path
-    DATASET = data_args.dataset_name
 
-    print(encoder, decoder, model_name, DATASET)
+    print(model_args, data_args, training_args)
 
     dataset = load_dataset(
         data_args.dataset_name,
@@ -274,14 +273,20 @@ def main():
 
     processor = TrOCRProcessor(feature_extractor, tokenizer)
 
-    dataset.map(preprocess, processor=processor, batched=True)
+    fn_kwargs = dict(
+        processor = processor,
+    )
 
-    if training_args.do_train:
-        train_dataset = dataset["train"]
-    elif training_args.do_eval:
-        eval_dataset = dataset["validation"]
-    elif training_args.do_predict:
-        predict_dataset = dataset["test"]
+    dataset = dataset.map(preprocess,fn_kwargs=fn_kwargs,remove_columns=["id"])
+
+    train_dataset = dataset["train"]
+    eval_dataset = dataset["validation"]
+    predict_dataset = dataset["test"]
+
+    print(f"Train dataset size: {len(train_dataset)}")
+    print(f"Eval dataset size: {len(eval_dataset)}")
+    print(f"Predict dataset size: {len(predict_dataset)}")
+    print(train_dataset[0])
 
     def model_init():
         model = VisionEncoderDecoderModel.from_encoder_decoder_pretrained(encoder, decoder)
@@ -320,6 +325,7 @@ def main():
         seed=training_args.seed,
         report_to="wandb",
         load_best_model_at_end=True,
+        metric_for_best_model="cer",
     )
 
     cer_metric = load_metric("cer")
@@ -342,20 +348,14 @@ def main():
         tokenizer=processor.feature_extractor,
         args=training_args,
         compute_metrics=compute_metrics,
-        train_dataset=train_dataset if training_args.do_train else None,
-        eval_dataset=eval_dataset if training_args.do_eval else None,
+        train_dataset=train_dataset,
+        eval_dataset=eval_dataset,
         data_collator=default_data_collator,
     )
 
     if training_args.do_train:
         train_result = trainer.train()
         metrics = train_result.metrics
-        max_train_samples = (
-            data_args.max_train_samples
-            if data_args.max_train_samples is not None
-            else len(train_dataset)
-        )
-        metrics["train_samples"] = min(max_train_samples, len(train_dataset))
 
         trainer.log_metrics("train", metrics)
         trainer.save_metrics("train", metrics)
@@ -363,12 +363,6 @@ def main():
 
     if training_args.do_eval:
         metrics = trainer.evaluate(metric_key_prefix="eval")
-        max_eval_samples = (
-            data_args.max_eval_samples
-            if data_args.max_eval_samples is not None
-            else len(eval_dataset)
-        )
-        metrics["eval_samples"] = min(max_eval_samples, len(eval_dataset))
 
         trainer.log_metrics("eval", metrics)
         trainer.save_metrics("eval", metrics)
@@ -404,10 +398,10 @@ def main():
                 with open(output_prediction_file, "w") as writer:
                     writer.write("\n".join(predictions))
 
-    if training_args.save_dir:
-        processor.save_pretrained(training_args.save_dir)
+    if model_args.save_dir:
+        processor.save_pretrained(model_args.save_dir)
         trainer.create_model_card(model_name=model_name)
-        trainer.save_model(training_args.save_dir)
+        trainer.save_model(model_args.save_dir)
 
 
 if __name__ == "__main__":

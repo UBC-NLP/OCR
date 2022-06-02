@@ -253,13 +253,13 @@ class DataTrainingArguments:
 
 def main():
     parser = HfArgumentParser((ModelArguments, DataTrainingArguments, Seq2SeqTrainingArguments))
-    model_args, data_args, training_args = parser.parse_args_into_dataclasses()
+    model_args, data_args, train_args = parser.parse_args_into_dataclasses()
 
     encoder = model_args.encoder_model_name_or_path
     decoder = model_args.decoder_model_name_or_path
     model_name = model_args.model_name_or_path
 
-    print(model_args, data_args, training_args)
+    print(model_args, data_args, train_args)
 
     dataset = load_dataset(
         data_args.dataset_name,
@@ -276,7 +276,6 @@ def main():
     fn_kwargs = dict(
         processor = processor,
     )
-
     dataset = dataset.map(preprocess,fn_kwargs=fn_kwargs,remove_columns=["id"])
 
     train_dataset = dataset["train"]
@@ -287,7 +286,6 @@ def main():
     print(f"Eval dataset size: {len(eval_dataset)}")
     print(f"Predict dataset size: {len(predict_dataset)}")
 
-    
     model = VisionEncoderDecoderModel.from_encoder_decoder_pretrained(encoder, decoder)
     model.config.decoder_start_token_id = processor.tokenizer.cls_token_id
     model.config.pad_token_id = processor.tokenizer.pad_token_id
@@ -309,25 +307,25 @@ def main():
         predict_with_generate=True,
         evaluation_strategy="epoch",
         save_strategy="epoch",
-        per_device_train_batch_size=training_args.per_device_train_batch_size,
-        per_device_eval_batch_size=training_args.per_device_eval_batch_size,
+        per_device_train_batch_size=train_args.per_device_train_batch_size,
+        per_device_eval_batch_size=train_args.per_device_eval_batch_size,
         fp16=True,
         output_dir=model_name,
         adam_beta1=0.9,
         adam_beta2=0.98,
         adam_epsilon=1e-08,
         logging_strategy="epoch",  # 4,  ###
-        num_train_epochs=training_args.num_train_epochs,
+        num_train_epochs=train_args.num_train_epochs,
         save_total_limit=1,
         weight_decay=0.005,
-        learning_rate=training_args.learning_rate,
-        seed=training_args.seed,
+        learning_rate=train_args.learning_rate,
+        seed=train_args.seed,
         report_to="wandb",
         load_best_model_at_end=True,
         metric_for_best_model="cer",
-        do_train=training_args.do_train,
-        do_eval=training_args.do_eval,
-        do_predict=training_args.do_predict,
+        do_train=train_args.do_train,
+        do_eval=train_args.do_eval,
+        do_predict=train_args.do_predict,
     )
 
     cer_metric = load_metric("cer")

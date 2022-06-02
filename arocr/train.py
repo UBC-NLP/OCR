@@ -353,7 +353,7 @@ def main():
         data_collator=default_data_collator,
     )
 
-    if training_args.do_train:
+    if training_args.do_train and training_args.do_eval:
         print("Training model")
         train_result = trainer.train()
         metrics = train_result.metrics
@@ -361,9 +361,6 @@ def main():
         trainer.log_metrics("train", metrics)
         trainer.save_metrics("train", metrics)
         trainer.save_state()
-
-
-    if training_args.do_eval:
         print("Evaluating model")
         metrics = trainer.evaluate(metric_key_prefix="eval")
 

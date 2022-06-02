@@ -1,0 +1,69 @@
+entity: gagan3012
+method: random
+metric:
+  goal: minimize
+  name: cer
+parameters:
+  num_train_epochs:
+    distribution: int_uniform
+    max: 5
+    min: 1
+  learning_rate:
+    distribution: log_uniform
+    max: -6
+    min: -14
+  model_name_or_path:
+    values:
+      - arocr
+  encoder_model_name_or_path:
+    values:
+      - facebook/deit-base-distilled-patch16-224
+      - microsoft/beit-base-patch16-224-pt22k-ft22k
+      - google/vit-base-patch16-224
+  decoder_model_name_or_path:
+    values:
+      - xlm-roberta-base
+  dataset_name:
+    values:
+      - /project/6007993/DataBank/OCR_data/Datasets/al/_Ready/AraOCR_dataset
+  dataset_config_name:
+    values:
+      - ADAB
+      - OnlineKhatt
+      - UPTI
+      - shotor
+      - IDPL-PFOD
+  save_dir:
+    values:
+      - ~/scratch/arocr/checkpoints/
+  output_dir:
+    values:
+      - ~/scratch/arocr/outputs/
+  cache_dir:
+    values:
+      - ~/scratch/arocr/cache/
+  seed:
+    values:
+      - 42
+  do_train:
+    values:
+      - True
+  do_eval:
+    values:
+      - True
+  do_predict:
+    values:
+      - True
+  per_device_train_batch_size:
+    distribution: int_uniform
+    max: 32
+    min: 1
+  per_device_eval_batch_size:
+    distribution: int_uniform
+    max: 32
+    min: 1
+  predict_with_generate:
+    values:
+      - True
+program: train.py
+project: arocr

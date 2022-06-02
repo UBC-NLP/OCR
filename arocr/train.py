@@ -357,13 +357,11 @@ def main():
         print("Training model")
         train_result = trainer.train()
         metrics = train_result.metrics
-
         trainer.log_metrics("train", metrics)
         trainer.save_metrics("train", metrics)
         trainer.save_state()
         print("Evaluating model")
         metrics = trainer.evaluate(metric_key_prefix="eval")
-
         trainer.log_metrics("eval", metrics)
         trainer.save_metrics("eval", metrics)
 

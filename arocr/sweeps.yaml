@@ -2,7 +2,7 @@ entity: gagan3012
 method: random
 metric:
   goal: minimize
-  name: cer
+  name: eval/cer
 parameters:
   cache_dir:
     values:

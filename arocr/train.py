@@ -286,23 +286,22 @@ def main():
     print(f"Train dataset size: {len(train_dataset)}")
     print(f"Eval dataset size: {len(eval_dataset)}")
     print(f"Predict dataset size: {len(predict_dataset)}")
-    print(train_dataset[0])
 
-    def model_init():
-        model = VisionEncoderDecoderModel.from_encoder_decoder_pretrained(encoder, decoder)
-        model.config.decoder_start_token_id = processor.tokenizer.cls_token_id
-        model.config.pad_token_id = processor.tokenizer.pad_token_id
-        # make sure vocab size is set correctly
-        model.config.vocab_size = model.config.decoder.vocab_size
+    
+    model = VisionEncoderDecoderModel.from_encoder_decoder_pretrained(encoder, decoder)
+    model.config.decoder_start_token_id = processor.tokenizer.cls_token_id
+    model.config.pad_token_id = processor.tokenizer.pad_token_id
+    # make sure vocab size is set correctly
+    model.config.vocab_size = model.config.decoder.vocab_size
 
         # set beam search parameters
-        model.config.eos_token_id = processor.tokenizer.sep_token_id
-        model.config.max_length = 64
-        model.config.early_stopping = True
-        model.config.no_repeat_ngram_size = 3
-        model.config.length_penalty = 2.0
-        model.config.num_beams = 4
-        return model
+    model.config.eos_token_id = processor.tokenizer.sep_token_id
+    model.config.max_length = 64
+    model.config.early_stopping = True
+    model.config.no_repeat_ngram_size = 3
+    model.config.length_penalty = 2.0
+    model.config.num_beams = 4
+        
 
     # set special tokens used for creating the decoder_input_ids from the labels
 
@@ -326,6 +325,9 @@ def main():
         report_to="wandb",
         load_best_model_at_end=True,
         metric_for_best_model="cer",
+        do_train=training_args.do_train,
+        do_eval=training_args.do_eval,
+        do_predict=training_args.do_predict,
     )
 
     cer_metric = load_metric("cer")
@@ -344,7 +346,7 @@ def main():
 
     # instantiate trainer
     trainer = Seq2SeqTrainer(
-        model_init=model_init,
+        model=model,
         tokenizer=processor.feature_extractor,
         args=training_args,
         compute_metrics=compute_metrics,
@@ -354,6 +356,7 @@ def main():
     )
 
     if training_args.do_train:
+        print("Training model")
         train_result = trainer.train()
         metrics = train_result.metrics
 
@@ -361,13 +364,16 @@ def main():
         trainer.save_metrics("train", metrics)
         trainer.save_state()
 
+
     if training_args.do_eval:
+        print("Evaluating model")
         metrics = trainer.evaluate(metric_key_prefix="eval")
 
         trainer.log_metrics("eval", metrics)
         trainer.save_metrics("eval", metrics)
 
     if training_args.do_predict:
+        print("Predicting")
         predict_results = trainer.predict(
             predict_dataset,
             metric_key_prefix="predict",

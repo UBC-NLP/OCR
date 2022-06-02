@@ -5,7 +5,7 @@
 #SBATCH --mail-type=END
 #SBATCH --nodes=1
 #SBATCH --mem=64G
-#SBATCH --time=15:00:00
+#SBATCH --time=5:00:00
 #SBATCH --job-name=train_demo
 #SBATCH --output=out_%x.out
 #SBATCH --error=err_%x.err

@@ -16,5 +16,18 @@ def split_dataset(datset, file):
 
 
 print("start")
-for dataset_name in ["OnlineKhatt", "ADAB", "IDPL-PFOD", "shotor", "UPTI"]:
+for dataset_name in [
+    # line based
+    "PATS01",
+    "IDPL-PFOD",
+    "UPTI",
+    "OnlineKHATT",
+    # word based
+    "ADAB",
+    "alexuw",
+    "shotor",
+    # char based
+    "MADBase",
+    "AHCD"
+]:
     split_dataset(dataset_name, "./data/{}/{}.tsv".format(dataset_name, dataset_name))

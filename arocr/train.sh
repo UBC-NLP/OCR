@@ -22,28 +22,16 @@ source ~/ocr/bin/activate
 #pip3 install torch
 #pip3 install wandb
 
-dataset=$1
-cache_dir=$2
-le=$3
-batch_size=$4
-model_name=$5
-output_dir=$6
-epochs_num=$7
-encoder=$8
-decoder=$9
-seed=${10}
-
-
 pwd
 
 echo "Training started at $(date)"
 
 python train.py \
-    --model_name_or_path $model_name  \
-    --encoder_model_name_or_path $encoder \
-    --decoder_model_name_or_path $decoder \
+    --model_name_or_path arocr  \
+    --encoder_model_name_or_path facebook/deit-base-distilled-patch16-224 \
+    --decoder_model_name_or_path xlm-roberta-base \
     --dataset_name /project/6007993/DataBank/OCR_data/Datasets/al/_Ready/AraOCR_dataset \
-    --dataset_config_name $dataset \
+    --dataset_config_name ADAB \
     --save_dir ~/scratch/arocr/checkpoints/ \
     --output_dir ~/scratch/arocr/outputs/ \
     --cache_dir ~/scratch/arocr/cache/ \
@@ -53,8 +41,9 @@ python train.py \
     --per_device_train_batch_size 16 \
     --per_device_eval_batch_size 16 \
     --seed 42 \
-    --num_train_epochs 1 \
+    --num_train_epochs 5 \
     --learning_rate 2e-5 \
     --predict_with_generate 
+
       
 echo "Training ended at $(date)"

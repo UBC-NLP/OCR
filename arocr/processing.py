@@ -34,7 +34,20 @@ WRITE DESCRIPTION
 """
 
 _URL = "/project/6007993/DataBank/OCR_data/Datasets/al/_Ready/AraOCR_dataset/data"
-_TASKS = ["OnlineKhatt", "ADAB", "IDPL-PFOD", "shotor", "UPTI"]
+_TASKS = [
+    # line based
+    "PATS01",
+    "IDPL-PFOD",
+    "UPTI",
+    "OnlineKHATT",
+    # word based
+    "ADAB",
+    "alexuw",
+    "shotor",
+    # char based
+    "MADBase",
+    "AHCD"
+]
 
 
 # _TASKS_data={

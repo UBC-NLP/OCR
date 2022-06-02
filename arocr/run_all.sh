@@ -26,6 +26,6 @@ pwd
 
 echo "Training started at $(date)"
 
-wandb agent gagan3012/arocr/vz7z4kyk
+wandb agent gagan3012/arocr/8yjpb2qs
       
 echo "Training ended at $(date)"

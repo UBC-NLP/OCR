@@ -98,6 +98,38 @@ class ModelArguments:
         },
     )
 
+@dataclass
+class TrainingArguments:
+    per_device_train_batch_size: Optional[int] = field(
+        default=None,
+        metadata={
+            "help": (
+                "For debugging purposes or quicker training, truncate the number of training examples to this "
+                "value if set."
+            )
+        },
+    )
+    per_device_eval_batch_size: Optional[int] = field(
+        default=None,
+        metadata={
+            "help": (
+                "For debugging purposes or quicker training, truncate the number of training examples to this "
+                "value if set."
+            )
+        },
+    )
+    num_train_epochs: int = field(
+        default=3,
+        metadata={"help": "Total number of training epochs to perform."},
+    )
+    learning_rate: float = field(
+        default=5e-5,
+        metadata={"help": "The initial learning rate for Adam."},
+    )
+    output_dir: Optional[str] = field(
+        default=None,
+        metadata={"help": "The output directory where the model predictions and checkpoints will be written."},
+    )
 
 @dataclass
 class DataTrainingArguments:
@@ -252,14 +284,38 @@ class DataTrainingArguments:
 
 
 def main():
-    parser = HfArgumentParser((ModelArguments, DataTrainingArguments, Seq2SeqTrainingArguments))
+    parser = HfArgumentParser((ModelArguments, DataTrainingArguments, TrainingArguments))
     model_args, data_args, train_args = parser.parse_args_into_dataclasses()
 
     encoder = model_args.encoder_model_name_or_path
     decoder = model_args.decoder_model_name_or_path
     model_name = model_args.model_name_or_path
 
-    print(model_args, data_args, train_args)
+    training_args = Seq2SeqTrainingArguments(
+        predict_with_generate=True,
+        evaluation_strategy="epoch",
+        save_strategy="epoch",
+        logging_strategy="epoch",
+        per_device_train_batch_size=train_args.per_device_train_batch_size,
+        per_device_eval_batch_size=train_args.per_device_eval_batch_size,
+        fp16=True,
+        adam_beta1=0.9,
+        adam_beta2=0.98,
+        adam_epsilon=1e-08,
+        num_train_epochs=train_args.num_train_epochs,
+        weight_decay=0.005,
+        learning_rate=train_args.learning_rate,
+        seed=42,
+        report_to="wandb",
+        load_best_model_at_end=True,
+        metric_for_best_model="cer",
+        do_train=True,
+        do_eval=True,
+        do_predict=True,
+        output_dir =train_args.output_dir,
+    )
+
+    print(model_args, data_args, training_args)
 
     dataset = load_dataset(
         data_args.dataset_name,
@@ -276,11 +332,11 @@ def main():
     fn_kwargs = dict(
         processor = processor,
     )
-    dataset = dataset.map(preprocess,fn_kwargs=fn_kwargs,remove_columns=["id"])
+    df = dataset.map(preprocess,fn_kwargs=fn_kwargs,remove_columns=["id"])
 
-    train_dataset = dataset["train"]
-    eval_dataset = dataset["validation"]
-    predict_dataset = dataset["test"]
+    train_dataset = df["train"]
+    eval_dataset = df["validation"]
+    predict_dataset = df["test"]
 
     print(f"Train dataset size: {len(train_dataset)}")
     print(f"Eval dataset size: {len(eval_dataset)}")
@@ -292,7 +348,7 @@ def main():
     # make sure vocab size is set correctly
     model.config.vocab_size = model.config.decoder.vocab_size
 
-        # set beam search parameters
+    # set beam search parameters
     model.config.eos_token_id = processor.tokenizer.sep_token_id
     model.config.max_length = 64
     model.config.early_stopping = True
@@ -300,34 +356,8 @@ def main():
     model.config.length_penalty = 2.0
     model.config.num_beams = 4
         
-
     # set special tokens used for creating the decoder_input_ids from the labels
-
-    training_args = Seq2SeqTrainingArguments(
-        predict_with_generate=True,
-        evaluation_strategy="epoch",
-        save_strategy="epoch",
-        per_device_train_batch_size=train_args.per_device_train_batch_size,
-        per_device_eval_batch_size=train_args.per_device_eval_batch_size,
-        fp16=True,
-        output_dir=model_name,
-        adam_beta1=0.9,
-        adam_beta2=0.98,
-        adam_epsilon=1e-08,
-        logging_strategy="epoch",  # 4,  ###
-        num_train_epochs=train_args.num_train_epochs,
-        save_total_limit=1,
-        weight_decay=0.005,
-        learning_rate=train_args.learning_rate,
-        seed=train_args.seed,
-        report_to="wandb",
-        load_best_model_at_end=True,
-        metric_for_best_model="cer",
-        do_train=train_args.do_train,
-        do_eval=train_args.do_eval,
-        do_predict=train_args.do_predict,
-    )
-
+     
     cer_metric = load_metric("cer")
 
     def compute_metrics(pred):

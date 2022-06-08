@@ -1,12 +1,12 @@
 #!/bin/bash
 #SBATCH --account=def-mageed
-#SBATCH --gres=gpu:v100l:1
+#SBATCH --gres=gpu:v100l:4
 #SBATCH --mail-user=gbhatia880@gmail.com
-#SBATCH --mail-type=END
+#SBATCH --mail-type=ALL
 #SBATCH --nodes=1
 #SBATCH --mem=64G
-#SBATCH --time=15:00:00
-#SBATCH --job-name=train_demo
+#SBATCH --time=5:00:00
+#SBATCH --job-name=run_all_models
 #SBATCH --output=out_%x.out
 #SBATCH --error=err_%x.err
 
@@ -32,18 +32,14 @@ python train.py \
     --decoder_model_name_or_path xlm-roberta-base \
     --dataset_name /project/6007993/DataBank/OCR_data/Datasets/al/_Ready/AraOCR_dataset \
     --dataset_config_name ADAB \
-    --save_dir ~/scratch/arocr/checkpoints/ \
-    --output_dir ~/scratch/arocr/outputs/ \
-    --cache_dir ~/scratch/arocr/cache/ \
-    --do_train \
-    --do_eval \
-    --do_predict \
+    --save_dir /home/gagan30/scratch/arocr/checkpoints/ \
+    --output_dir /home/gagan30/scratch/arocr/outputs/ \
+    --cache_dir /home/gagan30/scratch/arocr/cache/ \
     --per_device_train_batch_size 16 \
     --per_device_eval_batch_size 16 \
-    --seed 42 \
     --num_train_epochs 5 \
     --learning_rate 2e-5 \
-    --predict_with_generate 
 
-      
+#wandb agent gagan3012/arocr/dedghj2a
+
 echo "Training ended at $(date)"

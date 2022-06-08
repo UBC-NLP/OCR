@@ -1,11 +1,11 @@
 #!/bin/bash
 #SBATCH --account=def-mageed
-#SBATCH --gres=gpu:v100l:1
+#SBATCH --gres=gpu:v100l:4
 #SBATCH --mail-user=gbhatia880@gmail.com
 #SBATCH --mail-type=END
 #SBATCH --nodes=1
 #SBATCH --mem=64G
-#SBATCH --time=5:00:00
+#SBATCH --time=2:59:00
 #SBATCH --job-name=train_demo
 #SBATCH --output=out_%x.out
 #SBATCH --error=err_%x.err

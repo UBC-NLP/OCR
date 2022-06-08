@@ -40,6 +40,6 @@ python train.py \
     --num_train_epochs 5 \
     --learning_rate 2e-5 \
 
-wandb agent mahsanghani/arocr/
+#wandb agent mahsanghani/arocr/
 
 echo "Training ended at $(date)"

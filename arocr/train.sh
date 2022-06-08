@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=def-mageed
 #SBATCH --gres=gpu:v100l:4
-#SBATCH --mail-user=gbhatia880@gmail.com
+#SBATCH --mail-user=ghaniahsan@outlook.com
 #SBATCH --mail-type=ALL
 #SBATCH --nodes=1
 #SBATCH --mem=64G
@@ -32,14 +32,14 @@ python train.py \
     --decoder_model_name_or_path xlm-roberta-base \
     --dataset_name /project/6007993/DataBank/OCR_data/Datasets/al/_Ready/AraOCR_dataset \
     --dataset_config_name ADAB \
-    --save_dir /home/gagan30/scratch/arocr/checkpoints/ \
-    --output_dir /home/gagan30/scratch/arocr/outputs/ \
-    --cache_dir /home/gagan30/scratch/arocr/cache/ \
+    --save_dir /home/ahsang/scratch/arocr/checkpoints/ \
+    --output_dir /home/ahsang/scratch/arocr/outputs/ \
+    --cache_dir /home/ahsang/scratch/arocr/cache/ \
     --per_device_train_batch_size 16 \
     --per_device_eval_batch_size 16 \
     --num_train_epochs 5 \
     --learning_rate 2e-5 \
 
-#wandb agent gagan3012/arocr/dedghj2a
+wandb agent mahsanghani/arocr/
 
 echo "Training ended at $(date)"

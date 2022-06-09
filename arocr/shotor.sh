@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=64G
-#SBATCH --gres=gpu:4
+#SBATCH --gres=gpu:v100l:4
 #SBATCH --account=def-mageed
 #SBATCH --mail-user=ghaniahsan@outlook.com
 #SBATCH --mail-type=ALL

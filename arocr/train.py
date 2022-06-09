@@ -298,7 +298,7 @@ def main():
         logging_strategy="epoch",
         per_device_train_batch_size=train_args.per_device_train_batch_size,
         per_device_eval_batch_size=train_args.per_device_eval_batch_size,
-        fp16=True,
+        fp16=False,
         adam_beta1=0.9,
         adam_beta2=0.98,
         adam_epsilon=1e-08,

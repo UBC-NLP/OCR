@@ -23,6 +23,7 @@ pip3 install datasets
 pip3 install transformers
 pip3 install torch
 pip3 install wandb
+pip3 install jiwer
 
 pwd
 

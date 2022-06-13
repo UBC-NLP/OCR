@@ -1,4 +1,4 @@
-entity: gagan3012
+entity: mahsanghani
 method: random
 metric:
   goal: minimize
@@ -6,34 +6,36 @@ metric:
 parameters:
   cache_dir:
     values:
-      - /home/gagan30/scratch/arocr/cache/
+      - /home/ahsang/scratch/arocr/cache/
   dataset_config_name:
     values:
       - ADAB
-    #  - OnlineKhatt
-    #  - UPTI
-    #  - shotor
-    #  - IDPL-PFOD
+      - alexuw
+      - PATS01
+      - OnlineKhatt
+      - UPTI
+      - shotor
+      - IDPL-PFOD
   dataset_name:
     values:
-      - /project/6007993/DataBank/OCR_data/Datasets/al/_Ready/AraOCR_dataset
+      - /home/ahsang/scratch/AraOCR_dataset
   decoder_model_name_or_path:
     values:
       - xlm-roberta-base
-  do_eval:
-    values:
-      - true
-  do_predict:
-    values:
-      - true
-  do_train:
-    values:
-      - true
+  # do_eval:
+  #   values:
+  #     - true
+  # do_predict:
+  #   values:
+  #     - true
+  # do_train:
+  #   values:
+  #     - true
   encoder_model_name_or_path:
     values:
       - facebook/deit-base-distilled-patch16-224
-      #- microsoft/beit-base-patch16-224-pt22k-ft22k
-      #- google/vit-base-patch16-224
+      - microsoft/beit-base-patch16-224-pt22k-ft22k
+      - google/vit-base-patch16-224
   learning_rate:
     distribution: log_uniform
     max: -6
@@ -47,21 +49,21 @@ parameters:
     min: 1
   output_dir:
     values:
-      - /home/gagan30/scratch/arocr/outputs/
+      - /home/ahsang/scratch/arocr/outputs/
   per_device_eval_batch_size:
     values:
       - 8
   per_device_train_batch_size:
     values:
       - 8
-  predict_with_generate:
-    values:
-      - true
+  # predict_with_generate:
+  #   values:
+  #     - true
   save_dir:
     values:
-      - /home/gagan30/scratch/arocr/checkpoints/
-  seed:
-    values:
-      - 42
+      - /home/ahsang/scratch/arocr/checkpoints/
+  # seed:
+  #   values:
+  #     - 42
 program: train.py
 project: arocr

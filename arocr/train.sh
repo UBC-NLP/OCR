@@ -32,11 +32,11 @@ python train.py \
     --model_name_or_path arocr  \
     --encoder_model_name_or_path facebook/deit-base-distilled-patch16-224 \
     --decoder_model_name_or_path xlm-roberta-base \
-    --dataset_name /project/6007993/DataBank/OCR_data/Datasets/al/_Ready/AraOCR_dataset \
+    --dataset_name /home/ahsang/scratch/AraOCR_dataset \
     --dataset_config_name ADAB \
     --save_dir /home/ahsang/scratch/arocr/checkpoints/ \
     --output_dir /home/ahsang/scratch/arocr/outputs/ \
-    --cache_dir /home/ahsang/scratch/arocr/cache/ \
+    --cache_dir /home/ahsang/scratch/arocr/cache2/ \
     --per_device_train_batch_size 16 \
     --per_device_eval_batch_size 16 \
     --num_train_epochs 5 \

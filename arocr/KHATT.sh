@@ -32,7 +32,7 @@ python train.py \
     --model_name_or_path arocr  \
     --encoder_model_name_or_path facebook/deit-base-distilled-patch16-224 \
     --decoder_model_name_or_path xlm-roberta-base \
-    --dataset_name /project/6007993/DataBank/OCR_data/Datasets/al/_Ready/AraOCR_dataset \
+    --dataset_name /home/ahsang/scratch/AraOCR_dataset \
     --dataset_config_name OnlineKhatt \
     --save_dir /home/ahsang/scratch/arocr/checkpoints/ \
     --output_dir /home/ahsang/scratch/arocr/outputs/ \

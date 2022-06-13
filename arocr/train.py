@@ -400,7 +400,7 @@ def main():
         predict_results = trainer.predict(
             predict_dataset,
             metric_key_prefix="predict",
-            batch_size=training_args.per_device_eval_batch_size,
+            # batch_size=training_args.per_device_eval_batch_size,
         )
         metrics = predict_results.metrics
         max_predict_samples = (

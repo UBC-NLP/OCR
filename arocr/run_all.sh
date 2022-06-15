@@ -16,16 +16,16 @@ module load gcc arrow
 module load cuda cudnn
 
 
-source ~/ocr/bin/activate
-pip3 install datasets
-pip3 install transformers 
-pip3 install torch
+#source ~/ocr/bin/activate
+#pip3 install datasets
+#pip3 install transformers
+#pip3 install torch
 pip3 install wandb
 
 pwd
 
 echo "Training started at $(date)"
 
-wandb agent mahsanghani/arocr/ninph8ty
+wandb agent mahsanghani/arocr/b9s0btj8
       
 echo "Training ended at $(date)"

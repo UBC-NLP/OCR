@@ -11,11 +11,11 @@ parameters:
     values:
       - ADAB
       - alexuw
-      - PATS01
-      - OnlineKhatt
-      - UPTI
+#      - PATS01
+#      - OnlineKhatt
+#      - UPTI
       - shotor
-      - IDPL-PFOD
+#      - IDPL-PFOD
   dataset_name:
     values:
       - /home/ahsang/scratch/AraOCR_dataset

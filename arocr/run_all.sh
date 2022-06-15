@@ -16,7 +16,7 @@ module load gcc arrow
 module load cuda cudnn
 
 
-#source ~/ocr/bin/activate
+source ~/ocr/bin/activate
 #pip3 install datasets
 #pip3 install transformers
 #pip3 install torch

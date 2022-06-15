@@ -19,10 +19,10 @@ module load cuda cudnn
 
 
 source ~/ocr/bin/activate
-pip3 install datasets
-pip3 install transformers
-pip3 install torch
-pip3 install wandb
+# pip3 install datasets
+# pip3 install transformers
+# pip3 install torch
+# pip3 install wandb
 
 pwd
 
@@ -39,8 +39,8 @@ python train.py \
     --cache_dir /home/ahsang/scratch/arocr/cache2/ \
     --per_device_train_batch_size 16 \
     --per_device_eval_batch_size 16 \
-    --num_train_epochs 50 \
-    --learning_rate 4.5e-5 \
+    --num_train_epochs 1 \
+    --learning_rate 4.5e-6 \
 
 #wandb agent mahsanghani/arocr/
 

@@ -8,7 +8,7 @@
 #SBATCH --account=def-mageed
 #SBATCH --mail-user=ghaniahsan@outlook.com
 #SBATCH --mail-type=ALL
-#SBATCH --job-name=adab
+#SBATCH --job-name=idpl
 #SBATCH --output=out_%x.out
 #SBATCH --error=err_%x.err
 

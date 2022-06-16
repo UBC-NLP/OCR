@@ -17,12 +17,11 @@ module load scipy-stack
 module load gcc arrow
 module load cuda cudnn
 
-
 source ~/ocr/bin/activate
-pip3 install datasets
-pip3 install transformers
-pip3 install torch
-pip3 install wandb
+# pip3 install datasets
+# pip3 install transformers
+# pip3 install torch
+# pip3 install wandb
 
 pwd
 
@@ -30,17 +29,17 @@ echo "Training started at $(date)"
 
 python train.py \
     --model_name_or_path arocr  \
-    --encoder_model_name_or_path microsoft/beit-base-patch16-224 \
+    --encoder_model_name_or_path facebook/deit-base-distilled-patch16-224 \
     --decoder_model_name_or_path xlm-roberta-base \
     --dataset_name /home/ahsang/scratch/AraOCR_dataset \
     --dataset_config_name PATS01 \
     --save_dir /home/ahsang/scratch/arocr/checkpoints/ \
     --output_dir /home/ahsang/scratch/arocr/outputs/ \
-    --cache_dir /home/ahsang/scratch/arocr/cache/ \
+    --cache_dir /home/ahsang/scratch/arocr/cache2/ \
     --per_device_train_batch_size 16 \
     --per_device_eval_batch_size 16 \
-    --num_train_epochs 50 \
-    --learning_rate 4.5e-5 \
+    --num_train_epochs 1 \
+    --learning_rate 4.5e-6 \
 
 #wandb agent mahsanghani/arocr/
 

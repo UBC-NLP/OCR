@@ -1,14 +1,22 @@
+<<<<<<< HEAD
 entity: mahsanghani
 method: random
+=======
+entity: gagan3012
+method: grid
+>>>>>>> 8906a63bdf64fe24800e4360bee4607ab19d7b54
 metric:
   goal: minimize
   name: eval/cer
+  target: 0
 parameters:
   cache_dir:
+    distribution: categorical
     values:
       - /home/ahsang/scratch/arocr/cache/
   dataset_config_name:
     values:
+<<<<<<< HEAD
       - ADAB
       - alexuw
 #      - PATS01
@@ -31,39 +39,61 @@ parameters:
   # do_train:
   #   values:
   #     - true
+=======
+      - OnlineKhatt
+      - PATS01
+      - IDPL-PFOD
+  dataset_name:
+    values:
+      - /home/gagan30/scratch/arocr/AraOCR_dataset
+  decoder_model_name_or_path:
+    values:
+      - xlm-roberta-base
+      - UBC-NLP/MARBERTv2
+      - UBC-NLP/ARBERT
+>>>>>>> 8906a63bdf64fe24800e4360bee4607ab19d7b54
   encoder_model_name_or_path:
     values:
       - facebook/deit-base-distilled-patch16-224
       - microsoft/beit-base-patch16-224-pt22k-ft22k
       - google/vit-base-patch16-224
   learning_rate:
-    distribution: log_uniform
-    max: -6
-    min: -14
+    values:
+      - 4.539992e-05
   model_name_or_path:
+    distribution: categorical
     values:
       - arocr
   num_train_epochs:
-    distribution: int_uniform
-    max: 5
-    min: 1
+    values:
+      - 25
   output_dir:
     values:
       - /home/ahsang/scratch/arocr/outputs/
   per_device_eval_batch_size:
     values:
-      - 8
+      - 16
   per_device_train_batch_size:
     values:
+<<<<<<< HEAD
       - 8
   # predict_with_generate:
   #   values:
   #     - true
+=======
+      - 16
+>>>>>>> 8906a63bdf64fe24800e4360bee4607ab19d7b54
   save_dir:
+    distribution: categorical
     values:
+<<<<<<< HEAD
       - /home/ahsang/scratch/arocr/checkpoints/
   # seed:
   #   values:
   #     - 42
 program: train.py
+=======
+      - /home/gagan30/scratch/arocr/checkpoints/
+program: code/train.py
+>>>>>>> 8906a63bdf64fe24800e4360bee4607ab19d7b54
 project: arocr

@@ -420,11 +420,11 @@ def main():
                     clean_up_tokenization_spaces=True,
                 )
                 predictions = [pred.strip() for pred in predictions]
-                # output_prediction_file = os.path.join(
-                #     training_args.save_dir, "generated_predictions.txt"
-                # )
-                # with open(output_prediction_file, "w") as writer:
-                #     writer.write("\n".join(predictions))
+                output_prediction_file = os.path.join(
+                    model_args.save_dir, "generated_predictions.txt"
+                )
+                with open(output_prediction_file, "w") as writer:
+                    writer.write("\n".join(predictions))
 
     if model_args.save_dir:
         processor.save_pretrained(model_args.save_dir)

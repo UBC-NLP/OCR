@@ -17,7 +17,6 @@ import os
 
 wandb.init(project="arocr", entity="mahsanghani", settings=wandb.Settings(start_method="fork"))
 
-
 def preprocess(examples, processor, max_target_length=128):
     text = examples["text"]
     image = examples["image"].convert("RGB")
@@ -298,7 +297,7 @@ def main():
         logging_strategy="epoch",
         per_device_train_batch_size=train_args.per_device_train_batch_size,
         per_device_eval_batch_size=train_args.per_device_eval_batch_size,
-        fp16=True,
+        fp16=False,
         adam_beta1=0.9,
         adam_beta2=0.98,
         adam_epsilon=1e-08,
@@ -400,7 +399,7 @@ def main():
         predict_results = trainer.predict(
             predict_dataset,
             metric_key_prefix="predict",
-            batch_size=training_args.per_device_eval_batch_size,
+            # batch_size=training_args.per_device_eval_batch_size,
         )
         metrics = predict_results.metrics
         max_predict_samples = (
@@ -422,7 +421,7 @@ def main():
                 )
                 predictions = [pred.strip() for pred in predictions]
                 output_prediction_file = os.path.join(
-                    training_args.save_dir, "generated_predictions.txt"
+                    model_args.save_dir, "generated_predictions.txt"
                 )
                 with open(output_prediction_file, "w") as writer:
                     writer.write("\n".join(predictions))

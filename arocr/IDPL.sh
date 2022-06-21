@@ -8,7 +8,7 @@
 #SBATCH --account=def-mageed
 #SBATCH --mail-user=ghaniahsan@outlook.com
 #SBATCH --mail-type=ALL
-#SBATCH --job-name=adab
+#SBATCH --job-name=idpl
 #SBATCH --output=out_%x.out
 #SBATCH --error=err_%x.err
 
@@ -19,10 +19,10 @@ module load cuda cudnn
 
 
 source ~/ocr/bin/activate
-# pip3 install datasets
-# pip3 install transformers
-# pip3 install torch
-# pip3 install wandb
+pip3 install datasets
+pip3 install transformers
+pip3 install torch
+pip3 install wandb
 
 pwd
 
@@ -33,14 +33,14 @@ python train.py \
     --encoder_model_name_or_path facebook/deit-base-distilled-patch16-224 \
     --decoder_model_name_or_path xlm-roberta-base \
     --dataset_name /home/ahsang/scratch/AraOCR_dataset \
-    --dataset_config_name ADAB \
+    --dataset_config_name IDPL-PFOD \
     --save_dir /home/ahsang/scratch/arocr/checkpoints/ \
     --output_dir /home/ahsang/scratch/arocr/outputs/ \
-    --cache_dir /home/ahsang/scratch/arocr/cache2/ \
+    --cache_dir /home/ahsang/scratch/arocr/cache/ \
     --per_device_train_batch_size 16 \
     --per_device_eval_batch_size 16 \
-    --num_train_epochs 1 \
-    --learning_rate 4.5e-6 \
+    --num_train_epochs 50 \
+    --learning_rate 4.5e-5 \
 
 #wandb agent mahsanghani/arocr/
 

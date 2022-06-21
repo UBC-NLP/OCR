@@ -1,12 +1,12 @@
 #!/bin/bash
 #SBATCH --account=def-mageed
 #SBATCH --gres=gpu:v100l:4
-#SBATCH --mail-user=gbhatia880@gmail.com
+#SBATCH --mail-user=ghaniahsan@outlook.com
 #SBATCH --mail-type=END
 #SBATCH --nodes=1
 #SBATCH --mem=64G
-#SBATCH --time=2:59:00
-#SBATCH --job-name=train_demo
+#SBATCH --time=3:00:00
+#SBATCH --job-name=run_all
 #SBATCH --output=out_%x.out
 #SBATCH --error=err_%x.err
 
@@ -17,15 +17,15 @@ module load cuda cudnn
 
 
 source ~/ocr/bin/activate
-#pip3 install datasets
-#pip3 install transformers 
-#pip3 install torch
-#pip3 install wandb
+# pip3 install datasets
+# pip3 install transformers
+# pip3 install torch
+pip3 install wandb
 
 pwd
 
 echo "Training started at $(date)"
 
-#wandb agent gagan3012/arocr/2svarh5t
+wandb agent mahsanghani/arocr/9p2cqt6e
       
 echo "Training ended at $(date)"

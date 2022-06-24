@@ -14,8 +14,12 @@ import wandb
 from dataclasses import dataclass, field
 from typing import Optional
 import os
+from torch.utils.data import Dataset
+from PIL import Image
+import pandas as pd
 
-wandb.init(project="arocr", entity="mahsanghani", settings=wandb.Settings(start_method="fork"))
+wandb.init(project="arocr", entity="gagan3012", settings=wandb.Settings(start_method="fork"))
+
 
 def preprocess(examples, processor, max_target_length=128):
     text = examples["text"]
@@ -280,6 +284,42 @@ class DataTrainingArguments:
             )
         },
     )
+    split: Optional[float] = field(
+        default=1,
+        metadata={
+            "help": (
+                "The data split"
+            )
+        },
+    )
+
+class OCRDataset(Dataset):
+    def __init__(self, df, processor, transforms=lambda x:x, max_target_length=128):
+        self.df = df
+        self.processor = processor
+        self.transforms = transforms
+        self.max_target_length = max_target_length
+
+    def __len__(self):
+        return len(self.df)
+
+    def __getitem__(self, idx):
+        # get file name + text 
+        #file_name = self.df['file_name'][idx]
+        text = self.df['text'][idx]
+        # prepare image (i.e. resize + normalize)
+        image = self.df['image'][idx].convert("RGB")
+        image = self.transforms(image)
+        pixel_values = self.processor(image, return_tensors="pt").pixel_values
+        # add labels (input_ids) by encoding the text
+        labels = self.processor.tokenizer(text, 
+                                          padding="max_length", 
+                                          max_length=self.max_target_length).input_ids
+        # important: make sure that PAD tokens are ignored by the loss function
+        labels = [label if label != self.processor.tokenizer.pad_token_id else -100 for label in labels]
+
+        encoding = {"pixel_values": pixel_values.squeeze(), "labels": torch.tensor(labels)}
+        return encoding
 
 
 def main():
@@ -297,7 +337,7 @@ def main():
         logging_strategy="epoch",
         per_device_train_batch_size=train_args.per_device_train_batch_size,
         per_device_eval_batch_size=train_args.per_device_eval_batch_size,
-        fp16=False,
+        #fp16=True,
         adam_beta1=0.9,
         adam_beta2=0.98,
         adam_epsilon=1e-08,
@@ -328,14 +368,35 @@ def main():
 
     processor = TrOCRProcessor(feature_extractor, tokenizer)
 
-    fn_kwargs = dict(
-        processor = processor,
-    )
-    df = dataset.map(preprocess,fn_kwargs=fn_kwargs,remove_columns=["id"])
+    #fn_kwargs = dict(
+    #    processor = processor,
+    #)
+    #df = dataset.map(preprocess,fn_kwargs=fn_kwargs,remove_columns=["id"])
 
-    train_dataset = df["train"]
-    eval_dataset = df["validation"]
-    predict_dataset = df["test"]
+    df_train = pd.DataFrame(dataset['train'])
+    df_eval = pd.DataFrame(dataset['validation'])
+    df_pred = pd.DataFrame(dataset['test'])
+
+    df_train = df_train.sample(frac=data_args.split)
+    df_eval = df_eval.sample(frac=data_args.split)
+    df_pred = df_pred.sample(frac=data_args.split)
+
+    transformer = lambda x: x 
+
+    train_dataset = OCRDataset(df=df_train, 
+                               processor=processor, 
+                               max_target_length=128, 
+                               transforms=transformer)
+
+    eval_dataset = OCRDataset(df=df_eval,
+                              processor=processor,
+                              max_target_length=128,
+                              transforms=transformer)
+
+    predict_dataset = OCRDataset(df=df_pred, 
+                                 processor=processor, 
+                                 max_target_length=128,
+                                 transforms=transformer)
 
     print(f"Train dataset size: {len(train_dataset)}")
     print(f"Eval dataset size: {len(eval_dataset)}")
@@ -393,13 +454,10 @@ def main():
         metrics = trainer.evaluate(metric_key_prefix="eval")
         trainer.log_metrics("eval", metrics)
         trainer.save_metrics("eval", metrics)
-
-    if training_args.do_predict:
         print("Predicting")
         predict_results = trainer.predict(
             predict_dataset,
             metric_key_prefix="predict",
-            # batch_size=training_args.per_device_eval_batch_size,
         )
         metrics = predict_results.metrics
         max_predict_samples = (

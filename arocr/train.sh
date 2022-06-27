@@ -30,8 +30,8 @@ echo "Training started at $(date)"
 
 python train.py \
     --model_name_or_path microsoft/trocr-large-handwritten  \
-    # --encoder_model_name_or_path facebook/deit-base-distilled-patch16-224 \
-    # --decoder_model_name_or_path xlm-roberta-base \
+    --encoder_model_name_or_path facebook/deit-base-distilled-patch16-224 \
+    --decoder_model_name_or_path xlm-roberta-base \
     --dataset_name /home/ahsang/scratch/AraOCR_dataset \
     --dataset_config_name ADAB \
     --save_dir /home/ahsang/scratch/arocr/checkpoints/ \

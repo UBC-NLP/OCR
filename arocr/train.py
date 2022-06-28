@@ -383,6 +383,10 @@ def main():
     df_eval = df_eval.sample(frac=data_args.split)
     df_pred = df_pred.sample(frac=data_args.split)
 
+    df_train.reset_index(drop=True, inplace=True)
+    df_eval.reset_index(drop=True, inplace=True)
+    df_pred.reset_index(drop=True, inplace=True)
+
     transformer = lambda x: x 
 
     train_dataset = OCRDataset(df=df_train, 

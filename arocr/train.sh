@@ -41,7 +41,7 @@ python train.py \
     --per_device_eval_batch_size 8 \
     --num_train_epochs 5 \
     --learning_rate 4.5e-6 \
-    --split 0.5 \
+    --split 0.5
 
 # wandb agent mahsanghani/arocr/
 

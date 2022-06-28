@@ -1,8 +1,6 @@
 #!/bin/bash
 #SBATCH --time=12:00:00
-#SBATCH --ntasks=1
 #SBATCH --nodes=1
-#SBATCH --cpus-per-task=4
 #SBATCH --mem=64G
 #SBATCH --gres=gpu:v100l:4
 #SBATCH --account=def-mageed

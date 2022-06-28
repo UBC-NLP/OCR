@@ -29,7 +29,7 @@ pwd
 echo "Training started at $(date)"
 
 python train.py \
-    --model_name_or_path microsoft/trocr-large-handwritten  \
+    --model_name_or_path microsoft/trocr-base-handwritten  \
     --encoder_model_name_or_path facebook/deit-base-distilled-patch16-224 \
     --decoder_model_name_or_path xlm-roberta-base \
     --dataset_name /home/ahsang/scratch/AraOCR_dataset \

@@ -362,7 +362,7 @@ def main():
         cache_dir=model_args.cache_dir,
     )
 
-    processor = TrOCRProcessor.from_pretrained('microsoft/trocr-large-handwritten')
+    processor = TrOCRProcessor.from_pretrained('microsoft/trocr-base-handwritten')
 
     # tokenizer = AutoTokenizer.from_pretrained(decoder)
 

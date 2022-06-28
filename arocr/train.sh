@@ -41,7 +41,8 @@ python train.py \
     --per_device_eval_batch_size 16 \
     --num_train_epochs 1 \
     --learning_rate 4.5e-6 \
+    --split 0.5 \
 
-#wandb agent mahsanghani/arocr/
+# wandb agent mahsanghani/arocr/
 
 echo "Training ended at $(date)"

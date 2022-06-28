@@ -18,7 +18,7 @@ from torch.utils.data import Dataset
 from PIL import Image
 import pandas as pd
 
-wandb.init(project="arocr", entity="gagan3012", settings=wandb.Settings(start_method="fork"))
+wandb.init(project="arocr", entity="mahsanghani", settings=wandb.Settings(start_method="fork"))
 
 
 def preprocess(examples, processor, max_target_length=128):
@@ -362,16 +362,18 @@ def main():
         cache_dir=model_args.cache_dir,
     )
 
-    tokenizer = AutoTokenizer.from_pretrained(decoder)
+    processor = TrOCRProcessor.from_pretrained('microsoft/trocr-base-handwritten')
 
-    feature_extractor = AutoFeatureExtractor.from_pretrained(encoder)
+    # tokenizer = AutoTokenizer.from_pretrained(decoder)
 
-    processor = TrOCRProcessor(feature_extractor, tokenizer)
+    # feature_extractor = AutoFeatureExtractor.from_pretrained(encoder)
 
-    #fn_kwargs = dict(
+    # processor = TrOCRProcessor(feature_extractor, tokenizer)
+
+    # fn_kwargs = dict(
     #    processor = processor,
-    #)
-    #df = dataset.map(preprocess,fn_kwargs=fn_kwargs,remove_columns=["id"])
+    # )
+    # df = dataset.map(preprocess,fn_kwargs=fn_kwargs,remove_columns=["id"])
 
     df_train = pd.DataFrame(dataset['train'])
     df_eval = pd.DataFrame(dataset['validation'])
@@ -380,6 +382,10 @@ def main():
     df_train = df_train.sample(frac=data_args.split)
     df_eval = df_eval.sample(frac=data_args.split)
     df_pred = df_pred.sample(frac=data_args.split)
+
+    df_train.reset_index(drop=True, inplace=True)
+    df_eval.reset_index(drop=True, inplace=True)
+    df_pred.reset_index(drop=True, inplace=True)
 
     transformer = lambda x: x 
 
@@ -402,7 +408,9 @@ def main():
     print(f"Eval dataset size: {len(eval_dataset)}")
     print(f"Predict dataset size: {len(predict_dataset)}")
 
-    model = VisionEncoderDecoderModel.from_encoder_decoder_pretrained(encoder, decoder)
+    model = VisionEncoderDecoderModel.from_pretrained(model_name)
+
+    # model = VisionEncoderDecoderModel.from_encoder_decoder_pretrained(encoder, decoder)
     model.config.decoder_start_token_id = processor.tokenizer.cls_token_id
     model.config.pad_token_id = processor.tokenizer.pad_token_id
     # make sure vocab size is set correctly

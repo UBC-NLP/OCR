@@ -15,7 +15,6 @@ module load scipy-stack
 module load gcc arrow
 module load cuda cudnn
 
-
 source ~/ocr/bin/activate
 # pip3 install datasets
 # pip3 install transformers

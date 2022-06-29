@@ -101,6 +101,7 @@ class ModelArguments:
         },
     )
 
+
 @dataclass
 class TrainingArguments:
     per_device_train_batch_size: Optional[int] = field(
@@ -133,6 +134,7 @@ class TrainingArguments:
         default=None,
         metadata={"help": "The output directory where the model predictions and checkpoints will be written."},
     )
+
 
 @dataclass
 class DataTrainingArguments:
@@ -293,8 +295,9 @@ class DataTrainingArguments:
         },
     )
 
+
 class OCRDataset(Dataset):
-    def __init__(self, df, processor, transforms=lambda x:x, max_target_length=128):
+    def __init__(self, df, processor, transforms=lambda x: x, max_target_length=128):
         self.df = df
         self.processor = processor
         self.transforms = transforms
@@ -305,15 +308,15 @@ class OCRDataset(Dataset):
 
     def __getitem__(self, idx):
         # get file name + text 
-        #file_name = self.df['file_name'][idx]
+        # file_name = self.df['file_name'][idx]
         text = self.df['text'][idx]
         # prepare image (i.e. resize + normalize)
         image = self.df['image'][idx].convert("RGB")
         image = self.transforms(image)
         pixel_values = self.processor(image, return_tensors="pt").pixel_values
         # add labels (input_ids) by encoding the text
-        labels = self.processor.tokenizer(text, 
-                                          padding="max_length", 
+        labels = self.processor.tokenizer(text,
+                                          padding="max_length",
                                           max_length=self.max_target_length).input_ids
         # important: make sure that PAD tokens are ignored by the loss function
         labels = [label if label != self.processor.tokenizer.pad_token_id else -100 for label in labels]
@@ -331,28 +334,131 @@ def main():
     model_name = model_args.model_name_or_path
 
     training_args = Seq2SeqTrainingArguments(
-        predict_with_generate=True,
-        evaluation_strategy="epoch",
-        save_strategy="epoch",
-        logging_strategy="epoch",
-        per_device_train_batch_size=train_args.per_device_train_batch_size,
-        per_device_eval_batch_size=train_args.per_device_eval_batch_size,
-        #fp16=True,
-        adam_beta1=0.9,
-        adam_beta2=0.98,
-        adam_epsilon=1e-08,
-        num_train_epochs=train_args.num_train_epochs,
-        weight_decay=0.005,
-        learning_rate=train_args.learning_rate,
-        seed=42,
-        report_to="wandb",
-        load_best_model_at_end=True,
-        metric_for_best_model="cer",
+        output_dir=train_args.output_dir,
+        overwrite_output_dir=False,
         do_train=True,
         do_eval=True,
         do_predict=True,
-        output_dir =train_args.output_dir,
-    )
+        evaluation_strategy='no',
+        prediction_loss_only=False,
+        per_device_train_batch_size=train_args.per_device_train_batch_size,
+        per_device_eval_batch_size=train_args.per_device_eval_batch_size,
+        per_gpu_train_batch_size=None,
+        per_gpu_eval_batch_size=None,
+        gradient_accumulation_steps=1,
+        eval_accumulation_steps=None,
+        eval_delay=0,
+        learning_rate=5e-05,
+        weight_decay=0.0,
+        adam_beta1=0.9,
+        adam_beta2=0.999,
+        adam_epsilon=1e-08,
+        max_grad_norm=1.0,
+        num_train_epochs=train_args.num_train_epochs,
+        max_steps=-1,
+        lr_scheduler_type='linear',
+        warmup_ratio=0.0,
+        warmup_steps=0,
+        log_level='passive',
+        log_level_replica='passive',
+        log_on_each_node=True,
+        logging_dir=None,
+        logging_strategy='steps',
+        logging_first_step=False,
+        logging_steps=500,
+        logging_nan_inf_filter=True,
+        save_strategy='steps',
+        save_steps=500,
+        save_total_limit=None,
+        save_on_each_node=False,
+        no_cuda=False,
+        seed=42,
+        data_seed=None,
+        jit_mode_eval=False,
+        use_ipex=False,
+        bf16=False,
+        fp16=False,
+        fp16_opt_level='O1',
+        half_precision_backend='auto',
+        bf16_full_eval=False,
+        fp16_full_eval=False,
+        tf32=None,
+        local_rank=-1,
+        xpu_backend=None,
+        tpu_num_cores=None,
+        tpu_metrics_debug=False,
+        debug='',
+        dataloader_drop_last=False,
+        eval_steps=None,
+        dataloader_num_workers=0,
+        past_index=-1,
+        run_name=None,
+        disable_tqdm=None,
+        remove_unused_columns=True,
+        label_names=None,
+        load_best_model_at_end=True,
+        metric_for_best_model='cer',
+        greater_is_better=None,
+        ignore_data_skip=False,
+        sharded_ddp='',
+        fsdp='',
+        fsdp_min_num_params=0,
+        deepspeed=None,
+        label_smoothing_factor=0.0,
+        optim='adamw_hf',
+        adafactor=False,
+        group_by_length=False,
+        length_column_name='length',
+        report_to='wandb',
+        ddp_find_unused_parameters=None,
+        ddp_bucket_cap_mb=None,
+        dataloader_pin_memory=True,
+        skip_memory_metrics=True,
+        use_legacy_prediction_loop=False,
+        push_to_hub=False,
+        resume_from_checkpoint=None,
+        hub_model_id=None,
+        hub_strategy='every_save',
+        hub_token=None,
+        hub_private_repo=False,
+        gradient_checkpointing=False,
+        include_inputs_for_metrics=False,
+        fp16_backend='auto',
+        push_to_hub_model_id=None,
+        push_to_hub_organization=None,
+        push_to_hub_token=None,
+        mp_parameters='',
+        auto_find_batch_size=False,
+        full_determinism=False,
+        torchdynamo=None,
+        ray_scope='last',
+        sortish_sampler=False,
+        predict_with_generate=False,
+        generation_max_length=None,
+        generation_num_beams=None)
+    # (
+    #     predict_with_generate=True,
+    #     evaluation_strategy="epoch",
+    #     save_strategy="epoch",
+    #     logging_strategy="epoch",
+    #     per_device_train_batch_size=train_args.per_device_train_batch_size,
+    #     per_device_eval_batch_size=train_args.per_device_eval_batch_size,
+    #     #fp16=True,
+    #     adam_beta1=0.9, // default
+    #     adam_beta2=0.98, // default 0.999
+    #     adam_epsilon=1e-08, // default
+    #     num_train_epochs=train_args.num_train_epochs,
+    #     weight_decay=0.005,
+    #     learning_rate=train_args.learning_rate,
+    #     seed=42,
+    #     report_to="wandb",
+    #     load_best_model_at_end=True,
+    #     metric_for_best_model="cer",
+    #     do_train=True,
+    #     do_eval=True,
+    #     do_predict=True,
+    #     output_dir=train_args.output_dir,
+    # )
 
     print(model_args, data_args, training_args)
 
@@ -387,11 +493,11 @@ def main():
     df_eval.reset_index(drop=True, inplace=True)
     df_pred.reset_index(drop=True, inplace=True)
 
-    transformer = lambda x: x 
+    transformer = lambda x: x
 
-    train_dataset = OCRDataset(df=df_train, 
-                               processor=processor, 
-                               max_target_length=128, 
+    train_dataset = OCRDataset(df=df_train,
+                               processor=processor,
+                               max_target_length=128,
                                transforms=transformer)
 
     eval_dataset = OCRDataset(df=df_eval,
@@ -399,8 +505,8 @@ def main():
                               max_target_length=128,
                               transforms=transformer)
 
-    predict_dataset = OCRDataset(df=df_pred, 
-                                 processor=processor, 
+    predict_dataset = OCRDataset(df=df_pred,
+                                 processor=processor,
                                  max_target_length=128,
                                  transforms=transformer)
 
@@ -423,9 +529,9 @@ def main():
     model.config.no_repeat_ngram_size = 3
     model.config.length_penalty = 2.0
     model.config.num_beams = 4
-        
+
     # set special tokens used for creating the decoder_input_ids from the labels
-     
+
     cer_metric = load_metric("cer")
 
     def compute_metrics(pred):

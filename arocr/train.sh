@@ -34,11 +34,10 @@ python train.py \
     --save_dir /home/ahsang/scratch/arocr/checkpoints/ \
     --output_dir /home/ahsang/scratch/arocr/outputs/ \
     --cache_dir /home/ahsang/scratch/arocr/cache2/ \
-    --per_device_train_batch_size 8 \
-    --per_device_eval_batch_size 8 \
+    --per_device_train_batch_size 16 \
+    --per_device_eval_batch_size 16 \
     --num_train_epochs 5 \
-    --learning_rate 4.5e-6 \
-    --split 0.5
+    --learning_rate 4.5e-6
 
 # wandb agent mahsanghani/arocr/
 

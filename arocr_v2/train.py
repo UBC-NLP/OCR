@@ -26,7 +26,7 @@ def run(
     # keep package 0 for validation
     
     train_dataset = OCRDataset(dataset, processor, 'train', max_len, augment=True, skip_packages=[0])
-    eval_dataset = OCRDataset(dataset, processor, 'validation', max_len, augment=False, skip_packages=[0])
+    eval_dataset = OCRDataset(dataset, processor, 'dev', max_len, augment=False, skip_packages=[0])
     pred_dataset = OCRDataset(dataset, processor, 'test', max_len, augment=False, skip_packages=range(1, 9999))
 
     metrics = Metrics(processor)

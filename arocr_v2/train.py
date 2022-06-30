@@ -1,3 +1,4 @@
+from datasets import load_dataset
 import fire
 import wandb
 from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, default_data_collator, EarlyStoppingCallback
@@ -18,15 +19,15 @@ def run(
         num_decoder_layers=2,
         output_dir='/home/gagan30/scratch/arocr/output',
 ):
-    wandb.login()
+    dataset = load_dataset("gagan3012/OnlineKhatt")
 
     model, processor = get_model(encoder_name, decoder_name, max_len, num_decoder_layers)
 
     # keep package 0 for validation
     
-    train_dataset = OCRDataset(processor, 'train', max_len, augment=True, skip_packages=[0])
-    eval_dataset = OCRDataset(processor, 'validation', max_len, skip_packages=[0])
-    pred_dataset = OCRDataset(processor, 'test', max_len, augment=False, skip_packages=range(1, 9999))
+    train_dataset = OCRDataset(dataset, processor, 'train', max_len, augment=True, skip_packages=[0])
+    eval_dataset = OCRDataset(dataset, processor, 'validation', max_len, augment=False, skip_packages=[0])
+    pred_dataset = OCRDataset(dataset, processor, 'test', max_len, augment=False, skip_packages=range(1, 9999))
 
     metrics = Metrics(processor)
 

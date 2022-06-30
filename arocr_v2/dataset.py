@@ -8,15 +8,13 @@ from torch.utils.data import Dataset
 from datasets import load_dataset
 
 
-class MangaDataset(Dataset):
-    def __init__(self, processor, split, max_target_length, cache_dir, limit_size=None, augment=False, skip_packages=None):
+class OCRDataset(Dataset):
+    def __init__(self, data, processor, split, max_target_length, limit_size=None, augment=False, skip_packages=None):
         self.processor = processor
         self.max_target_length = max_target_length
-        self.cache_dir = cache_dir
-        data = []
+        self.data = data[split]
 
         print(f'Initializing dataset {split}...')
-
 
         print(f'Dataset {split}: {len(self.data)}')
 
@@ -27,8 +25,8 @@ class MangaDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
-        text = self.df['text'][idx]
-        text = sample.text
+        text = self.data['text'][idx]
+        image = self.data['image'][idx]
 
         if self.augment:
             medium_p = 0.8
@@ -43,7 +41,7 @@ class MangaDataset(Dataset):
         else:
             transform = None
 
-        pixel_values = self.read_image(self.processor, sample.path, transform)
+        pixel_values = self.read_image(self.processor, image, transform)
         labels = self.processor.tokenizer(text,
                                           padding="max_length",
                                           max_length=self.max_target_length,
@@ -60,7 +58,7 @@ class MangaDataset(Dataset):
 
     @staticmethod
     def read_image(processor, path, transform=None):
-        img = cv2.imread(str(path))
+        img = np.array(path)
 
         if transform is None:
             transform = A.ToGray(always_apply=True)
@@ -107,22 +105,24 @@ class MangaDataset(Dataset):
         ])
 
         return t_medium, t_heavy
-
+        
 
 if __name__ == '__main__':
-    from manga_ocr_dev.training.get_model import get_processor
-    from manga_ocr_dev.training.utils import tensor_to_image
+    from .get_model import get_processor
+    from .utils import tensor_to_image
 
     encoder_name = 'facebook/deit-tiny-patch16-224'
     decoder_name = 'cl-tohoku/bert-base-japanese-char-v2'
 
     max_length = 300
 
+    dataset = load_dataset("gagan3012/OnlineKhatt")
+
     processor = get_processor(encoder_name, decoder_name)
-    ds = MangaDataset(processor, 'train', max_length, augment=True)
+    ds = OCRDataset(dataset, processor, 'train', max_length, augment=True)
 
     for i in range(20):
-        sample = ds[0]
+        sample = ds[i]
         img = tensor_to_image(sample['pixel_values'])
         tokens = sample['labels']
         tokens[tokens == -100] = processor.tokenizer.pad_token_id

@@ -10,10 +10,10 @@ from arocr_v2.training.metrics import Metrics
 def run(
         run_name='debug',
         encoder_name='facebook/deit-tiny-patch16-224',
-        decoder_name='cl-tohoku/bert-base-japanese-char-v2',
+        decoder_name='UBC-NLP/MARBERTv2',
         max_len=300,
         num_decoder_layers=2,
-        output_dir=TRAIN_ROOT,
+        output_dir='/home/gagan30/scratch/arocr/output',
 ):
     wandb.login()
 

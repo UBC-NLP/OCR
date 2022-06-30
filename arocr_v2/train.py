@@ -2,9 +2,12 @@ import fire
 import wandb
 from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, default_data_collator, EarlyStoppingCallback
 import os
-from arocr_v2.dataset import OCRDataset
-from arocr_v2.get_model import get_model
-from arocr_v2.metrics import Metrics
+import sys
+sys.path.append("/home/gagan/lab/arocr/OCR/arocr_v2")
+
+from dataset import OCRDataset
+from get_model import get_model
+from metrics import Metrics
 
 
 def run(

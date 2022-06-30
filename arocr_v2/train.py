@@ -2,15 +2,15 @@ import fire
 import wandb
 from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, default_data_collator, EarlyStoppingCallback
 import os
-from arocr_v2.training.dataset import MangaDataset
-from arocr_v2.training.get_model import get_model
-from arocr_v2.training.metrics import Metrics
+from arocr_v2.dataset import OCRDataset
+from arocr_v2.get_model import get_model
+from arocr_v2.metrics import Metrics
 
 
 def run(
         run_name='debug',
         encoder_name='facebook/deit-tiny-patch16-224',
-        decoder_name='UBC-NLP/MARBERTv2',
+        decoder_name='asafaya/bert-mini-arabic',
         max_len=300,
         num_decoder_layers=2,
         output_dir='/home/gagan30/scratch/arocr/output',
@@ -21,9 +21,9 @@ def run(
 
     # keep package 0 for validation
     
-    train_dataset = MangaDataset(processor, 'train', max_len, augment=True, skip_packages=[0])
-    eval_dataset = MangaDataset(processor, 'validation', max_len, skip_packages=[0])
-    pred_dataset = MangaDataset(processor, 'test', max_len, augment=False, skip_packages=range(1, 9999))
+    train_dataset = OCRDataset(processor, 'train', max_len, augment=True, skip_packages=[0])
+    eval_dataset = OCRDataset(processor, 'validation', max_len, skip_packages=[0])
+    pred_dataset = OCRDataset(processor, 'test', max_len, augment=False, skip_packages=range(1, 9999))
 
     metrics = Metrics(processor)
 

@@ -29,16 +29,9 @@ def run(
     eval_dataset = OCRDataset(dataset, processor, 'dev', max_len, augment=False, skip_packages=[0])
     pred_dataset = OCRDataset(dataset, processor, 'test', max_len, augment=False, skip_packages=range(1, 9999))
 
-    train_dataset = pd.DataFrame(train_dataset)
-    eval_dataset = pd.DataFrame(eval_dataset)
-    pred_dataset = pd.DataFrame(pred_dataset)
-
-    print("train_dataset:", train_dataset.shape)
-    print(train_dataset.head())
-    print("eval_dataset:", eval_dataset.shape)
-    print(eval_dataset.head())
-    print("pred_dataset:", pred_dataset.shape)
-    print(pred_dataset.head())
+    print("train_dataset:", train_dataset)
+    print("eval_dataset:", eval_dataset)
+    print("pred_dataset:", pred_dataset)
 
     metrics = Metrics(processor)
 

@@ -26,7 +26,7 @@ class OCRDataset(Dataset):
 
     def __getitem__(self, idx):
         text = self.data['text'][idx]
-        image = self.data['image'][idx]
+        image = self.data['image'][idx].convert("RGB")
 
         if self.augment:
             medium_p = 0.8
@@ -41,14 +41,15 @@ class OCRDataset(Dataset):
         else:
             transform = None
 
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+
         pixel_values = self.read_image(self.processor, image, transform)
         labels = self.processor.tokenizer(text,
                                           padding="max_length",
                                           max_length=self.max_target_length,
-                                          truncation=True).input_ids
-        labels = np.array(labels)
-        # important: make sure that PAD tokens are ignored by the loss function
-        labels[labels == self.processor.tokenizer.pad_token_id] = -100
+                                          truncation=True).input_ids.to(device)
+
+        labels = [label if label != self.processor.tokenizer.pad_token_id else -100 for label in labels]
 
         encoding = {
             "pixel_values": pixel_values,
@@ -105,7 +106,7 @@ class OCRDataset(Dataset):
         ])
 
         return t_medium, t_heavy
-        
+
 
 if __name__ == '__main__':
     from .get_model import get_processor

@@ -1,5 +1,6 @@
 from transformers import AutoConfig, AutoModelForCausalLM, AutoModel, TrOCRProcessor, VisionEncoderDecoderModel, \
     AutoFeatureExtractor, AutoTokenizer, VisionEncoderDecoderConfig
+import torch
 
 
 class TrOCRProcessorCustom(TrOCRProcessor):
@@ -59,5 +60,7 @@ def get_model(encoder_name, decoder_name, max_length, num_decoder_layers=None):
     model.config.no_repeat_ngram_size = 3
     model.config.length_penalty = 2.0
     model.config.num_beams = 4
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model.to(device=device)
 
     return model, processor

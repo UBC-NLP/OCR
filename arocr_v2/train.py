@@ -1,6 +1,5 @@
 from datasets import load_dataset
 import fire
-import wandb
 from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, default_data_collator, EarlyStoppingCallback
 import os
 import sys
@@ -97,8 +96,6 @@ def run(
     print(predictions)
     with open(output_prediction_file, "w") as writer:
         writer.write("\n".join(predictions))
-    wandb.finish()
-
 
 if __name__ == '__main__':
     fire.Fire(run)

@@ -3,12 +3,14 @@ import fire
 from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, default_data_collator, EarlyStoppingCallback
 import os
 import sys
-import pandas as pd
+import matplotlib.pyplot as plt
+from torch.utils.data import DataLoader
 sys.path.append("/home/gagan/lab/arocr/OCR/arocr_v2")
 
 from dataset import OCRDataset
 from get_model import get_model
 from metrics import Metrics
+from utils import tensor_to_image
 
 
 def run(
@@ -32,6 +34,21 @@ def run(
     print("train_dataset:", train_dataset)
     print("eval_dataset:", eval_dataset)
     print("pred_dataset:", pred_dataset)
+
+    for i in range(5):
+        sample = train_dataset[i]
+        img = tensor_to_image(sample['pixel_values'])
+        tokens = sample['labels']
+        tokens[tokens == -100] = processor.tokenizer.pad_token_id
+        text = ''.join(processor.decode(tokens, skip_special_tokens=True).split())
+
+        print(f'{i}:\n{text}\n')
+        plt.imshow(img)
+        plt.show()
+
+    train_dataloader = DataLoader(train_dataset, batch_size=32, shuffle=True, collate_fn=default_data_collator)
+    eval_dataloader = DataLoader(eval_dataset, batch_size=32, shuffle=False, collate_fn=default_data_collator)
+    pred_dataloader = DataLoader(pred_dataset, batch_size=32, shuffle=False, collate_fn=default_data_collator)
 
     metrics = Metrics(processor)
 
@@ -68,8 +85,8 @@ def run(
         tokenizer=processor.feature_extractor,
         args=training_args,
         compute_metrics=metrics.compute_metrics,
-        train_dataset=train_dataset,
-        eval_dataset=eval_dataset,
+        train_dataset=train_dataloader,
+        eval_dataset=eval_dataloader,
         data_collator=default_data_collator,
         callbacks = [EarlyStoppingCallback(early_stopping_patience=3)]
     )
@@ -85,7 +102,7 @@ def run(
     trainer.save_metrics("eval", metrics)
     print("Predicting")
     predict_results = trainer.predict(
-        pred_dataset,
+        pred_dataloader,
         metric_key_prefix="predict",
     )
     metrics = predict_results.metrics

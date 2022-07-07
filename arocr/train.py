@@ -11,14 +11,17 @@ from transformers import (
     HfArgumentParser,
     EarlyStoppingCallback
 )
+import os
 import wandb
+import torch
+from torch.utils.data import Dataset
+from transformers.trainer_utils import get_last_checkpoint, is_main_process
+import pandas as pd
+from PIL import Image
 from dataclasses import dataclass, field
 from typing import Optional
-import os
-from torch.utils.data import Dataset
-import pandas as pd
 
-wandb.init(project="arocr", entity="gagan3012", settings=wandb.Settings(start_method="fork"))
+wandb.init(project="arocr", entity="mahsanghani", settings=wandb.Settings(start_method="fork"))
 
 
 def preprocess(examples, processor, max_target_length=128):
@@ -306,10 +309,9 @@ class OCRDataset(Dataset):
     def __getitem__(self, idx):
         # get file name + text 
         #file_name = self.df['file_name'][idx]
-        text = self.df['text'][idx]
+        text = str(self.df['text'][idx])
         # prepare image (i.e. resize + normalize)
-        image = self.df['image'][idx].convert("RGB")
-        image = self.transforms(image)
+        image = Image.open(file_name).convert("RGB")
         pixel_values = self.processor(image, return_tensors="pt").pixel_values
         # add labels (input_ids) by encoding the text
         labels = self.processor.tokenizer(text, 
@@ -330,30 +332,46 @@ def main():
     decoder = model_args.decoder_model_name_or_path
     model_name = model_args.model_name_or_path
 
+    # training_args = Seq2SeqTrainingArguments(
+    #     predict_with_generate=True,
+    #     evaluation_strategy="epoch",
+    #     save_strategy="epoch",
+    #     logging_strategy="epoch",
+    #     per_device_train_batch_size=train_args.per_device_train_batch_size,
+    #     per_device_eval_batch_size=train_args.per_device_eval_batch_size,
+    #     fp16=True,
+    #     adam_beta1=0.9,
+    #     adam_beta2=0.999,
+    #     adam_epsilon=1e-08,
+    #     num_train_epochs=train_args.num_train_epochs,
+    #     weight_decay=0.005,
+    #     learning_rate=train_args.learning_rate,
+    #     seed=42,
+    #     report_to="wandb",
+    #     load_best_model_at_end=True,
+    #     metric_for_best_model="cer",
+    #     greater_is_better=False,
+    #     do_train=True,
+    #     do_eval=True,
+    #     do_predict=True,
+    #     output_dir =train_args.output_dir,
+    # )
+
     training_args = Seq2SeqTrainingArguments(
-        predict_with_generate=True,
-        evaluation_strategy="epoch",
-        save_strategy="epoch",
-        logging_strategy="epoch",
-        per_device_train_batch_size=train_args.per_device_train_batch_size,
-        per_device_eval_batch_size=train_args.per_device_eval_batch_size,
-        fp16=True,
-        adam_beta1=0.9,
-        adam_beta2=0.999,
-        adam_epsilon=1e-08,
-        num_train_epochs=train_args.num_train_epochs,
-        weight_decay=0.005,
-        learning_rate=train_args.learning_rate,
-        seed=42,
-        report_to="wandb",
-        load_best_model_at_end=True,
-        metric_for_best_model="cer",
-        greater_is_better=False,
-        do_train=True,
-        do_eval=True,
-        do_predict=True,
-        output_dir =train_args.output_dir,
-    )
+    predict_with_generate=True,
+    evaluation_strategy="epoch",
+    save_strategy="epoch",
+    logging_strategy="epoch",
+    per_device_train_batch_size=8,
+    per_device_eval_batch_size=8,
+    num_train_epochs=10,
+    fp16=True, 
+    # output_dir="./trocr_outputs",
+    output_dir="trocr_output",
+    load_best_model_at_end= True,
+    metric_for_best_model="cer",
+    greater_is_better= False,   
+)
 
     print(model_args, data_args, training_args)
 
@@ -383,34 +401,34 @@ def main():
     predict_dataset = df['test']
     eval_dataset = df['validation']
 
-    # df_train = pd.DataFrame(dataset['train'])
-    # df_eval = pd.DataFrame(dataset['validation'])
-    # df_pred = pd.DataFrame(dataset['test'])
+    df_train = pd.DataFrame(dataset['train'])
+    df_eval = pd.DataFrame(dataset['validation'])
+    df_pred = pd.DataFrame(dataset['test'])
 
-    # df_train = df_train.sample(frac=data_args.split)
-    # df_eval = df_eval.sample(frac=data_args.split)
-    # df_pred = df_pred.sample(frac=data_args.split)
+    df_train = df_train.sample(frac=data_args.split)
+    df_eval = df_eval.sample(frac=data_args.split)
+    df_pred = df_pred.sample(frac=data_args.split)
 
-    # df_train.reset_index(drop=True, inplace=True)
-    # df_eval.reset_index(drop=True, inplace=True)
-    # df_pred.reset_index(drop=True, inplace=True)
+    df_train.reset_index(drop=True, inplace=True)
+    df_eval.reset_index(drop=True, inplace=True)
+    df_pred.reset_index(drop=True, inplace=True)
 
-    # transformer = lambda x: x 
+    transformer = lambda x: x
 
-    # train_dataset = OCRDataset(df=df_train, 
-    #                            processor=processor, 
-    #                            max_target_length=128, 
-    #                            transforms=transformer)
+    train_dataset = OCRDataset(df=df_train, 
+                               processor=processor, 
+                               max_target_length=128, 
+                               transforms=transformer)
 
-    # eval_dataset = OCRDataset(df=df_eval,
-    #                           processor=processor,
-    #                           max_target_length=128,
-    #                           transforms=transformer)
+    eval_dataset = OCRDataset(df=df_eval,
+                              processor=processor,
+                              max_target_length=128,
+                              transforms=transformer)
 
-    # predict_dataset = OCRDataset(df=df_pred, 
-    #                              processor=processor, 
-    #                              max_target_length=128,
-    #                              transforms=transformer)
+    predict_dataset = OCRDataset(df=df_pred, 
+                                 processor=processor, 
+                                 max_target_length=128,
+                                 transforms=transformer)
 
     print(f"Train dataset size: {len(train_dataset)}")
     print(f"Eval dataset size: {len(eval_dataset)}")
@@ -432,6 +450,7 @@ def main():
     # set special tokens used for creating the decoder_input_ids from the labels
      
     cer_metric = load_metric("cer")
+    wer_metric = load_metric("wer")
 
     def compute_metrics(pred):
         labels_ids = pred.label_ids
@@ -442,8 +461,18 @@ def main():
         label_str = processor.batch_decode(labels_ids, skip_special_tokens=True)
 
         cer = cer_metric.compute(predictions=pred_str, references=label_str)
+        wer = wer_metric.compute(predictions=pred_str, references=label_str)
 
-        return {"cer": cer}
+        return {"cer": cer, "wer": wer}
+
+    early_stopping_num=3
+
+    try:
+        last_checkpoint = get_last_checkpoint(training_args.output_dir)
+    except:
+        last_checkpoint=None
+
+    print ("last_checkpoint", last_checkpoint)
 
     # instantiate trainer
     trainer = Seq2SeqTrainer(
@@ -454,7 +483,7 @@ def main():
         train_dataset=train_dataset,
         eval_dataset=eval_dataset,
         data_collator=default_data_collator,
-        callbacks=[EarlyStoppingCallback(early_stopping_patience=3)]
+        callbacks=[EarlyStoppingCallback(early_stopping_patience=early_stopping_num)]
     )
 
     if training_args.do_train and training_args.do_eval:

@@ -4,8 +4,6 @@ from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, default_data_
 import os
 import sys
 import matplotlib.pyplot as plt
-from torch.utils.data import DataLoader
-sys.path.append("/home/gagan/lab/arocr/OCR/arocr_v2")
 
 from dataset import OCRDataset
 from get_model import get_model
@@ -46,10 +44,6 @@ def run(
         plt.imshow(img)
         plt.show()
 
-    train_dataloader = DataLoader(train_dataset, batch_size=32, shuffle=True, collate_fn=default_data_collator)
-    eval_dataloader = DataLoader(eval_dataset, batch_size=32, shuffle=False, collate_fn=default_data_collator)
-    pred_dataloader = DataLoader(pred_dataset, batch_size=32, shuffle=False, collate_fn=default_data_collator)
-
     metrics = Metrics(processor)
 
     training_args = Seq2SeqTrainingArguments(
@@ -85,11 +79,12 @@ def run(
         tokenizer=processor.feature_extractor,
         args=training_args,
         compute_metrics=metrics.compute_metrics,
-        train_dataset=train_dataloader,
-        eval_dataset=eval_dataloader,
+        train_dataset=train_dataset,
+        eval_dataset=eval_dataset,
         data_collator=default_data_collator,
         callbacks = [EarlyStoppingCallback(early_stopping_patience=3)]
     )
+
     print("Starting training...")
     train_result = trainer.train()
     metrics = train_result.metrics
@@ -102,7 +97,7 @@ def run(
     trainer.save_metrics("eval", metrics)
     print("Predicting")
     predict_results = trainer.predict(
-        pred_dataloader,
+        pred_dataset,
         metric_key_prefix="predict",
     )
     metrics = predict_results.metrics

@@ -9,16 +9,16 @@ from transformers import (
     Seq2SeqTrainingArguments,
     default_data_collator,
     HfArgumentParser,
+    EarlyStoppingCallback
 )
 import wandb
 from dataclasses import dataclass, field
 from typing import Optional
 import os
 from torch.utils.data import Dataset
-from PIL import Image
 import pandas as pd
 
-wandb.init(project="arocr", entity="mahsanghani", settings=wandb.Settings(start_method="fork"))
+wandb.init(project="arocr", entity="gagan3012", settings=wandb.Settings(start_method="fork"))
 
 
 def preprocess(examples, processor, max_target_length=128):
@@ -337,9 +337,9 @@ def main():
         logging_strategy="epoch",
         per_device_train_batch_size=train_args.per_device_train_batch_size,
         per_device_eval_batch_size=train_args.per_device_eval_batch_size,
-        #fp16=True,
+        fp16=True,
         adam_beta1=0.9,
-        adam_beta2=0.98,
+        adam_beta2=0.999,
         adam_epsilon=1e-08,
         num_train_epochs=train_args.num_train_epochs,
         weight_decay=0.005,
@@ -348,6 +348,7 @@ def main():
         report_to="wandb",
         load_best_model_at_end=True,
         metric_for_best_model="cer",
+        greater_is_better=False,
         do_train=True,
         do_eval=True,
         do_predict=True,
@@ -362,55 +363,59 @@ def main():
         cache_dir=model_args.cache_dir,
     )
 
-    processor = TrOCRProcessor.from_pretrained('microsoft/trocr-base-handwritten')
+    if model_args.model_name_or_path is None:
+        tokenizer = AutoTokenizer.from_pretrained(decoder)
+        feature_extractor = AutoFeatureExtractor.from_pretrained(encoder)
+        processor = TrOCRProcessor(feature_extractor, tokenizer)
+        model = VisionEncoderDecoderModel.from_encoder_decoder_pretrained(encoder, decoder)
 
-    # tokenizer = AutoTokenizer.from_pretrained(decoder)
+    else:
+        processor = TrOCRProcessor.from_pretrained(model_name)
+        model = VisionEncoderDecoderModel.from_pretrained(model_name)
 
-    # feature_extractor = AutoFeatureExtractor.from_pretrained(encoder)
+    fn_kwargs = dict(
+        processor = processor,
+    )
+    df = dataset.map(preprocess,fn_kwargs=fn_kwargs,remove_columns=["id"])
 
-    # processor = TrOCRProcessor(feature_extractor, tokenizer)
+    # split dataset into train and test
+    train_dataset = df['train']
+    predict_dataset = df['test']
+    eval_dataset = df['validation']
 
-    # fn_kwargs = dict(
-    #    processor = processor,
-    # )
-    # df = dataset.map(preprocess,fn_kwargs=fn_kwargs,remove_columns=["id"])
+    # df_train = pd.DataFrame(dataset['train'])
+    # df_eval = pd.DataFrame(dataset['validation'])
+    # df_pred = pd.DataFrame(dataset['test'])
 
-    df_train = pd.DataFrame(dataset['train'])
-    df_eval = pd.DataFrame(dataset['validation'])
-    df_pred = pd.DataFrame(dataset['test'])
+    # df_train = df_train.sample(frac=data_args.split)
+    # df_eval = df_eval.sample(frac=data_args.split)
+    # df_pred = df_pred.sample(frac=data_args.split)
 
-    df_train = df_train.sample(frac=data_args.split)
-    df_eval = df_eval.sample(frac=data_args.split)
-    df_pred = df_pred.sample(frac=data_args.split)
+    # df_train.reset_index(drop=True, inplace=True)
+    # df_eval.reset_index(drop=True, inplace=True)
+    # df_pred.reset_index(drop=True, inplace=True)
 
-    df_train.reset_index(drop=True, inplace=True)
-    df_eval.reset_index(drop=True, inplace=True)
-    df_pred.reset_index(drop=True, inplace=True)
+    # transformer = lambda x: x 
 
-    transformer = lambda x: x 
+    # train_dataset = OCRDataset(df=df_train, 
+    #                            processor=processor, 
+    #                            max_target_length=128, 
+    #                            transforms=transformer)
 
-    train_dataset = OCRDataset(df=df_train, 
-                               processor=processor, 
-                               max_target_length=128, 
-                               transforms=transformer)
+    # eval_dataset = OCRDataset(df=df_eval,
+    #                           processor=processor,
+    #                           max_target_length=128,
+    #                           transforms=transformer)
 
-    eval_dataset = OCRDataset(df=df_eval,
-                              processor=processor,
-                              max_target_length=128,
-                              transforms=transformer)
-
-    predict_dataset = OCRDataset(df=df_pred, 
-                                 processor=processor, 
-                                 max_target_length=128,
-                                 transforms=transformer)
+    # predict_dataset = OCRDataset(df=df_pred, 
+    #                              processor=processor, 
+    #                              max_target_length=128,
+    #                              transforms=transformer)
 
     print(f"Train dataset size: {len(train_dataset)}")
     print(f"Eval dataset size: {len(eval_dataset)}")
     print(f"Predict dataset size: {len(predict_dataset)}")
 
-    model = VisionEncoderDecoderModel.from_pretrained(model_name)
-
-    # model = VisionEncoderDecoderModel.from_encoder_decoder_pretrained(encoder, decoder)
     model.config.decoder_start_token_id = processor.tokenizer.cls_token_id
     model.config.pad_token_id = processor.tokenizer.pad_token_id
     # make sure vocab size is set correctly
@@ -418,7 +423,7 @@ def main():
 
     # set beam search parameters
     model.config.eos_token_id = processor.tokenizer.sep_token_id
-    model.config.max_length = 64
+    model.config.max_length = 128
     model.config.early_stopping = True
     model.config.no_repeat_ngram_size = 3
     model.config.length_penalty = 2.0
@@ -449,6 +454,7 @@ def main():
         train_dataset=train_dataset,
         eval_dataset=eval_dataset,
         data_collator=default_data_collator,
+        callbacks=[EarlyStoppingCallback(early_stopping_patience=3)]
     )
 
     if training_args.do_train and training_args.do_eval:
@@ -489,6 +495,7 @@ def main():
                 output_prediction_file = os.path.join(
                     model_args.save_dir, "generated_predictions.txt"
                 )
+                print(predictions)
                 with open(output_prediction_file, "w") as writer:
                     writer.write("\n".join(predictions))
 

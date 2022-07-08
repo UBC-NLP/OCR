@@ -19,6 +19,6 @@ source ~/ocr/bin/activate
 
 echo "Training started at $(date)"
 
-wandb agent mahsanghani/arocr/9p2cqt6e
+wandb agent mahsanghani/arocr/0nwuvtys
       
 echo "Training ended at $(date)"

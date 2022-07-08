@@ -1,4 +1,4 @@
-entity: mahsanghani
+entity: gagan3012
 method: grid
 metric:
   goal: minimize
@@ -8,19 +8,14 @@ parameters:
   cache_dir:
     distribution: categorical
     values:
-      - /home/ahsang/scratch/arocr/cache/
+      - /home/gagan30/scratch/arocr/cache/
   dataset_config_name:
     values:
-      # - ADAB
-      # - alexuw
-      # - PATS01
-      - OnlineKhatt
-      - UPTI
-      # - shotor
-      - IDPL-PFOD
+      - PATS01
+      - IDPL-PFO
   dataset_name:
     values:
-      - /home/ahsang/scratch/AraOCR_dataset
+      - /home/gagan30/scratch/arocr/AraOCR_dataset
   decoder_model_name_or_path:
     values:
       - xlm-roberta-base
@@ -33,10 +28,10 @@ parameters:
       - microsoft/resnet-50
   num_train_epochs:
     values:
-      - 50
+      - 25
   output_dir:
     values:
-      - /home/ahsang/scratch/arocr/outputs/
+      - /home/gagan30/scratch/arocr/outputs/
   per_device_eval_batch_size:
     values:
       - 16
@@ -44,7 +39,8 @@ parameters:
     values:
       - 16
   save_dir:
+    distribution: categorical
     values:
-      - /home/ahsang/scratch/arocr/checkpoints/
-program: train.py
+      - /home/gagan30/scratch/arocr/checkpoints/
+program: code/train.py
 project: arocr

@@ -5,8 +5,8 @@
 #SBATCH --mail-type=ALL
 #SBATCH --nodes=1
 #SBATCH --mem=64G
-#SBATCH --time=5:00:00
-#SBATCH --job-name=run_all_models
+#SBATCH --time=10:00:00
+#SBATCH --job-name=run_all_models_v2
 #SBATCH --output=out_%x.out
 #SBATCH --error=err_%x.err
 
@@ -26,6 +26,6 @@ pwd
 
 echo "Training started at $(date)"
 
-wandb agent mahsanghani/arocr/65z2ryyh
+wandb agent mahsanghani/arocr/5vomflsk
 
 echo "Training ended at $(date)"

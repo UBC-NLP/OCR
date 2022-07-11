@@ -1,5 +1,4 @@
 from datasets import load_metric, load_dataset
-import torch
 from transformers import (
     TrOCRProcessor,
     AutoFeatureExtractor,
@@ -11,17 +10,19 @@ from transformers import (
     HfArgumentParser,
     EarlyStoppingCallback
 )
-import os
 import wandb
-import torch
-from torch.utils.data import Dataset
-from transformers.trainer_utils import get_last_checkpoint, is_main_process
-import pandas as pd
-from PIL import Image
 from dataclasses import dataclass, field
 from typing import Optional
+import os
+from torch.utils.data import Dataset
+from torch import tensor
+from torch.cuda import is_available
+import pandas as pd
+from io import BytesIO
+import base64
+from IPython.core.display import HTML
 
-wandb.init(project="arocr", entity="mahsanghani", settings=wandb.Settings(start_method="fork"))
+wandb.init(project="arocr", entity="gagan3012", settings=wandb.Settings(start_method="fork"))
 
 
 def preprocess(examples, processor, max_target_length=128):
@@ -32,7 +33,7 @@ def preprocess(examples, processor, max_target_length=128):
         text, padding="max_length", max_length=max_target_length
     ).input_ids
     labels = [label if label != processor.tokenizer.pad_token_id else -100 for label in labels]
-    encoding = {"pixel_values": pixel_values.squeeze(), "labels": torch.tensor(labels)}
+    encoding = {"pixel_values": pixel_values.squeeze(), "labels": tensor(labels)}
     return encoding
 
 
@@ -41,20 +42,23 @@ class ModelArguments:
     """
     Arguments pertaining to which model/config/tokenizer we are going to fine-tune from.
     """
-
+    use_encoder_decoder: bool = field(
+        default=True, 
+        metadata={"help": "Whether to use encoder-decoder model"}
+    )
+    encoder_model_name_or_path: str = field(
+        default="facebook/deit-base-distilled-patch16-224",
+        metadata={
+            "help": "Path to pretrained model or model identifier from huggingface.co/models"
+        }
+    )
+    decoder_model_name_or_path: str = field(
+        default="xlm-roberta-base",
+        metadata={
+            "help": "Path to pretrained model or model identifier from huggingface.co/models"
+        }
+    )
     model_name_or_path: Optional[str] = field(
-        default=None,
-        metadata={
-            "help": "Path to pretrained model or model identifier from huggingface.co/models"
-        }
-    )
-    encoder_model_name_or_path: Optional[str] = field(
-        default=None,
-        metadata={
-            "help": "Path to pretrained model or model identifier from huggingface.co/models"
-        }
-    )
-    decoder_model_name_or_path: Optional[str] = field(
         default=None,
         metadata={
             "help": "Path to pretrained model or model identifier from huggingface.co/models"
@@ -312,9 +316,10 @@ class OCRDataset(Dataset):
     def __getitem__(self, idx):
         # get file name + text 
         #file_name = self.df['file_name'][idx]
-        text = str(self.df['text'][idx])
+        text = self.df['text'][idx]
         # prepare image (i.e. resize + normalize)
-        image = Image.open(file_name).convert("RGB")
+        image = self.df['image'][idx].convert("RGB")
+        image = self.transforms(image)
         pixel_values = self.processor(image, return_tensors="pt").pixel_values
         # add labels (input_ids) by encoding the text
         labels = self.processor.tokenizer(text, 
@@ -323,7 +328,7 @@ class OCRDataset(Dataset):
         # important: make sure that PAD tokens are ignored by the loss function
         labels = [label if label != self.processor.tokenizer.pad_token_id else -100 for label in labels]
 
-        encoding = {"pixel_values": pixel_values.squeeze(), "labels": torch.tensor(labels)}
+        encoding = {"pixel_values": pixel_values.squeeze(), "labels": tensor(labels)}
         return encoding
 
 
@@ -334,56 +339,25 @@ def main():
     encoder = model_args.encoder_model_name_or_path
     decoder = model_args.decoder_model_name_or_path
     model_name = model_args.model_name_or_path
-
-    # training_args = Seq2SeqTrainingArguments(
-    #     predict_with_generate=True,
-    #     evaluation_strategy="epoch",
-    #     save_strategy="epoch",
-    #     logging_strategy="epoch",
-    #     per_device_train_batch_size=train_args.per_device_train_batch_size,
-    #     per_device_eval_batch_size=train_args.per_device_eval_batch_size,
-    #     fp16=True,
-    #     adam_beta1=0.9,
-    #     adam_beta2=0.999,
-    #     adam_epsilon=1e-08,
-    #     num_train_epochs=train_args.num_train_epochs,
-    #     weight_decay=0.005,
-    #     learning_rate=train_args.learning_rate,
-    #     seed=42,
-    #     report_to="wandb",
-    #     load_best_model_at_end=True,
-    #     metric_for_best_model="cer",
-    #     greater_is_better=False,
-    #     do_train=True,
-    #     do_eval=True,
-    #     do_predict=True,
-    #     output_dir =train_args.output_dir,
-    # )
+    try: 
+        encoder_split = encoder.split("/")[1]
+        decoder_split = decoder.split('/')[1]
+    except:
+        decoder_split = decoder
+        encoder_split = encoder
+    output_dir = "{}/{}-{}-{}".format(train_args.output_dir,
+                                      encoder_split,
+                                      decoder_split,
+                                       data_args.dataset_config_name)
 
     training_args = Seq2SeqTrainingArguments(
-<<<<<<< HEAD
-    predict_with_generate=True,
-    evaluation_strategy="epoch",
-    save_strategy="epoch",
-    logging_strategy="epoch",
-    per_device_train_batch_size=8,
-    per_device_eval_batch_size=8,
-    num_train_epochs=10,
-    fp16=True, 
-    # output_dir="./trocr_outputs",
-    output_dir="trocr_output",
-    load_best_model_at_end= True,
-    metric_for_best_model="cer",
-    greater_is_better= False,   
-)
-=======
         predict_with_generate=True,
         evaluation_strategy="epoch",
         save_strategy="epoch",
         logging_strategy="epoch",
         per_device_train_batch_size=train_args.per_device_train_batch_size,
         per_device_eval_batch_size=train_args.per_device_eval_batch_size,
-        fp16=True,
+        fp16= is_available(),
         num_train_epochs=train_args.num_train_epochs,
         report_to="wandb",
         load_best_model_at_end=True,
@@ -392,9 +366,12 @@ def main():
         do_train=True,
         do_eval=True,
         do_predict=True,
-        output_dir =train_args.output_dir,
+        output_dir = output_dir,
+        save_total_limit=2,
+        run_name="{}-{}-{}".format(encoder_split,
+                                   decoder_split,
+                                  data_args.dataset_config_name)
     )
->>>>>>> 5ebefd12fbdde007f075b84ceac1ffbeab210467
 
     print(model_args, data_args, training_args)
 
@@ -404,7 +381,7 @@ def main():
         cache_dir=model_args.cache_dir,
     )
 
-    if model_args.model_name_or_path is None:
+    if model_args.use_encoder_decoder:
         tokenizer = AutoTokenizer.from_pretrained(decoder)
         feature_extractor = AutoFeatureExtractor.from_pretrained(encoder)
         processor = TrOCRProcessor(feature_extractor, tokenizer)
@@ -414,29 +391,29 @@ def main():
         processor = TrOCRProcessor.from_pretrained(model_name)
         model = VisionEncoderDecoderModel.from_pretrained(model_name)
 
-    fn_kwargs = dict(
-        processor = processor,
-    )
-    df = dataset.map(preprocess,fn_kwargs=fn_kwargs,remove_columns=["id"])
+    #fn_kwargs = dict(
+    #    processor = processor,
+    #)
+    #df = dataset.map(preprocess,fn_kwargs=fn_kwargs,remove_columns=["id"])
 
     # split dataset into train and test
-    train_dataset = df['train']
-    predict_dataset = df['test']
-    eval_dataset = df['validation']
+    #train_dataset = df['train']
+    #predict_dataset = df['test']
+    #eval_dataset = df['validation']
 
     df_train = pd.DataFrame(dataset['train'])
     df_eval = pd.DataFrame(dataset['validation'])
     df_pred = pd.DataFrame(dataset['test'])
 
-    df_train = df_train.sample(frac=data_args.split)
-    df_eval = df_eval.sample(frac=data_args.split)
-    df_pred = df_pred.sample(frac=data_args.split)
+    # df_train = df_train.sample(frac=data_args.split)
+    # df_eval = df_eval.sample(frac=data_args.split)
+    # df_pred = df_pred.sample(frac=data_args.split)
 
-    df_train.reset_index(drop=True, inplace=True)
-    df_eval.reset_index(drop=True, inplace=True)
-    df_pred.reset_index(drop=True, inplace=True)
+    # df_train.reset_index(drop=True, inplace=True)
+    # df_eval.reset_index(drop=True, inplace=True)
+    # df_pred.reset_index(drop=True, inplace=True)
 
-    transformer = lambda x: x
+    transformer = lambda x: x 
 
     train_dataset = OCRDataset(df=df_train, 
                                processor=processor, 
@@ -488,14 +465,22 @@ def main():
 
         return {"cer": cer, "wer": wer}
 
-    early_stopping_num=3
+    def table_results(dataset_pred, save_dir):
+        def image_base64(im):
+            with BytesIO() as buffer:
+                im.save(buffer, 'jpeg')
+                return base64.b64encode(buffer.getvalue()).decode()
 
-    try:
-        last_checkpoint = get_last_checkpoint(training_args.output_dir)
-    except:
-        last_checkpoint=None
+        def image_formatter(im):
+            return f'<img src="data:image/jpeg;base64,{image_base64(im)}">'
 
-    print ("last_checkpoint", last_checkpoint)
+        ht = dataset_pred.to_html(
+            formatters={'image': image_formatter}, escape=False)
+        text_file = open(save_dir+"/"+"pred.html", "w")
+        text_file.write(ht)
+        text_file.close()
+
+        return HTML(dataset_pred.to_html(formatters={'image': image_formatter}, escape=False))
 
     # instantiate trainer
     trainer = Seq2SeqTrainer(
@@ -506,47 +491,47 @@ def main():
         train_dataset=train_dataset,
         eval_dataset=eval_dataset,
         data_collator=default_data_collator,
-        callbacks=[EarlyStoppingCallback(early_stopping_patience=early_stopping_num)]
+        callbacks=[EarlyStoppingCallback(early_stopping_patience=3)]
     )
 
-    if training_args.do_train and training_args.do_eval:
-        print("Training model")
-        train_result = trainer.train()
-        metrics = train_result.metrics
-        trainer.log_metrics("train", metrics)
-        trainer.save_metrics("train", metrics)
-        trainer.save_state()
-        print("Evaluating model")
-        metrics = trainer.evaluate(metric_key_prefix="eval")
-        trainer.log_metrics("eval", metrics)
-        trainer.save_metrics("eval", metrics)
-        print("Predicting")
-        predict_results = trainer.predict(
-            predict_dataset,
-            metric_key_prefix="predict",
-        )
-        metrics = predict_results.metrics
+    print("Training model")
+    train_result = trainer.train()
+    metrics = train_result.metrics
+    trainer.log_metrics("train", metrics)
+    trainer.save_metrics("train", metrics)
+    trainer.save_state()
+    print("Evaluating model")
+    metrics = trainer.evaluate(metric_key_prefix="eval")
+    trainer.log_metrics("eval", metrics)
+    trainer.save_metrics("eval", metrics)
+    print("Predicting")
+    predict_results = trainer.predict(
+        predict_dataset,
+        metric_key_prefix="predict",
+    )
+    metrics = predict_results.metrics
+    trainer.log_metrics("predict", metrics)
+    trainer.save_metrics("predict", metrics)
 
-        trainer.log_metrics("predict", metrics)
-        trainer.save_metrics("predict", metrics)
-
-        predictions = processor.batch_decode(
-            predict_results.predictions,
-            skip_special_tokens=True,
-            clean_up_tokenization_spaces=True,
-        )
-        predictions = [pred.strip() for pred in predictions]
-        output_prediction_file = os.path.join(
-            model_args.save_dir, "generated_predictions.txt"
-        )
-        print(predictions)
-        with open(output_prediction_file, "w") as writer:
-            writer.write("\n".join(predictions))
-
-    if model_args.save_dir:
-        processor.save_pretrained(model_args.save_dir)
-        trainer.create_model_card(model_name=model_name)
-        trainer.save_model(model_args.save_dir)
+    predictions = processor.batch_decode(
+        predict_results.predictions,
+        skip_special_tokens=True,
+        clean_up_tokenization_spaces=True,
+    )
+    predictions = [pred.strip() for pred in predictions]
+    df_pred["predictions"] = predictions
+    predict_cer  = metrics['predict_cer']
+            
+    save_dir = "{}/{}-{}-{}-{}".format(model_args.save_dir, 
+                                       encoder_split,
+                                       decoder_split,
+                                        data_args.dataset_config_name,
+                                        predict_cer)
+    os.makedirs(save_dir, exist_ok=True)
+    html_results = table_results(df_pred, save_dir)
+    processor.save_pretrained(save_dir)
+    trainer.create_model_card(save_dir)
+    trainer.save_model(save_dir)
 
 
 if __name__ == "__main__":

@@ -42,17 +42,17 @@ class ModelArguments:
     """
     Arguments pertaining to which model/config/tokenizer we are going to fine-tune from.
     """
-    use_encoder_decoder: bool = field(
+    use_encoder_decoder: Optional[bool] = field(
         default=True, 
         metadata={"help": "Whether to use encoder-decoder model"}
     )
-    encoder_model_name_or_path: str = field(
+    encoder_model_name_or_path: Optional[str] = field(
         default="facebook/deit-base-distilled-patch16-224",
         metadata={
             "help": "Path to pretrained model or model identifier from huggingface.co/models"
         }
     )
-    decoder_model_name_or_path: str = field(
+    decoder_model_name_or_path: Optional[str] = field(
         default="xlm-roberta-base",
         metadata={
             "help": "Path to pretrained model or model identifier from huggingface.co/models"

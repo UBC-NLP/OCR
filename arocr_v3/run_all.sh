@@ -13,4 +13,4 @@ export HOSTLIST="$PARENT $CHILDREN"
 export WORLD_SIZE=$SLURM_NTASKS
 echo $HOSTLIST
 
-./train_hf.sh $1 $2 $3 $4
+srun train_hf.sh $1 $2 $3 $4

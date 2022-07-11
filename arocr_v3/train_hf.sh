@@ -1,11 +1,8 @@
 #!/bin/bash
-/bin/hostname -s
-export NCCL_BLOCKING_WAIT=1
+module load python/3.8 scipy-stack gcc arrow cuda cudnn
 
-encoder=$1
-decoder=$2
-dataset=$3
-epochs=$4
+source ~/ocr/bin/activate
+
 
 echo "Training started at $(date)"
 echo "Num of node $SLURM_JOB_NUM_NODES"

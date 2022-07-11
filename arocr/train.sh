@@ -4,9 +4,9 @@
 #SBATCH --mem=64G
 #SBATCH --gres=gpu:v100l:4
 #SBATCH --account=def-mageed
-#SBATCH --mail-user=ghaniahsan@outlook.com
+#SBATCH --mail-user=gbhatia880@gmail.com
 #SBATCH --mail-type=ALL
-#SBATCH --job-name=adab
+#SBATCH --job-name=
 #SBATCH --output=out_%x.out
 #SBATCH --error=err_%x.err
 
@@ -26,7 +26,7 @@ pwd
 echo "Training started at $(date)"
 
 python train.py \
-    --model_name_or_path microsoft/trocr-base-handwritten  \
+    --model_name_or_path microsoft/trocr-base-stage1  \
     --encoder_model_name_or_path facebook/deit-base-distilled-patch16-224 \
     --decoder_model_name_or_path xlm-roberta-base \
     --dataset_name /home/ahsang/scratch/AraOCR_dataset \
@@ -38,8 +38,6 @@ python train.py \
     --per_device_eval_batch_size 8 \
     --num_train_epochs 5 \
     --learning_rate 4.5e-6 \
-    --split 0.5
 
-# wandb agent mahsanghani/arocr/
 
 echo "Training ended at $(date)"

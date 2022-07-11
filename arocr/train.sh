@@ -1,43 +1,35 @@
 #!/bin/bash
-#SBATCH --time=12:00:00
-#SBATCH --nodes=1
-#SBATCH --mem=64G
-#SBATCH --gres=gpu:v100l:4
-#SBATCH --account=def-mageed
-#SBATCH --mail-user=gbhatia880@gmail.com
-#SBATCH --mail-type=ALL
-#SBATCH --job-name=
-#SBATCH --output=out_%x.out
-#SBATCH --error=err_%x.err
+/bin/hostname -s
+export NCCL_BLOCKING_WAIT=1
 
-module load python/3.8
-module load scipy-stack
-module load gcc arrow
-module load cuda cudnn
-
-source ~/ocr/bin/activate
-# pip3 install datasets
-# pip3 install transformers
-# pip3 install torch
-# pip3 install wandb
-
-pwd
+encoder=$1
+decoder=$2
+dataset=$3
+epochs=$4
 
 echo "Training started at $(date)"
+echo "Num of node $SLURM_JOB_NUM_NODES"
+echo "Num of GPU per node $NPROC_PER_NODE"
+echo "PROCID: $SLURM_PROCID"
+echo "LOCALID: $SLURM_LOCALID"
+echo "Encoder: $encoder"
+echo "Decoder: $decoder"
+echo "Dataset: $dataset"
+echo "Epochs: $epochs"
 
-python train.py \
-    --model_name_or_path microsoft/trocr-base-stage1  \
-    --encoder_model_name_or_path facebook/deit-base-distilled-patch16-224 \
-    --decoder_model_name_or_path xlm-roberta-base \
-    --dataset_name /home/ahsang/scratch/AraOCR_dataset \
-    --dataset_config_name ADAB \
-    --save_dir /home/ahsang/scratch/arocr/checkpoints/ \
-    --output_dir /home/ahsang/scratch/arocr/outputs/ \
-    --cache_dir /home/ahsang/scratch/arocr/cache2/ \
-    --per_device_train_batch_size 8 \
-    --per_device_eval_batch_size 8 \
-    --num_train_epochs 5 \
-    --learning_rate 4.5e-6 \
-
+torchrun \
+    --nproc_per_node=$NPROC_PER_NODE \
+    --nnodes=$SLURM_JOB_NUM_NODES \
+    train.py \
+    --encoder_model_name_or_path $encoder \
+    --decoder_model_name_or_path $decoder \
+    --dataset_name /home/gagan30/scratch/arocr/AraOCR_dataset \
+    --dataset_config_name $dataset \
+    --save_dir ~/scratch/arocr/checkpoints/ \
+    --output_dir ~/scratch/arocr/outputs/ \
+    --cache_dir ~/scratch/arocr/cache/ \
+    --per_device_train_batch_size 16 \
+    --per_device_eval_batch_size 16 \
+    --num_train_epochs $epochs \
 
 echo "Training ended at $(date)"

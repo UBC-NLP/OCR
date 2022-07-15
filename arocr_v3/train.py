@@ -10,7 +10,7 @@ from transformers import (
     HfArgumentParser,
     EarlyStoppingCallback
 )
-import wandb
+#import wandb
 from dataclasses import dataclass, field
 from typing import Optional
 import os
@@ -22,7 +22,7 @@ from io import BytesIO
 import base64
 from IPython.core.display import HTML
 
-wandb.init(project="arocr", entity="gagan3012", settings=wandb.Settings(start_method="fork"))
+#wandb.init(project="arocr", entity="gagan3012", settings=wandb.Settings(start_method="fork"))
 
 
 def preprocess(examples, processor, max_target_length=128):
@@ -43,17 +43,17 @@ class ModelArguments:
     Arguments pertaining to which model/config/tokenizer we are going to fine-tune from.
     """
     use_encoder_decoder: Optional[bool] = field(
-        default=True, 
+        default=False, 
         metadata={"help": "Whether to use encoder-decoder model"}
     )
     encoder_model_name_or_path: Optional[str] = field(
-        default="facebook/deit-base-distilled-patch16-224",
+        default=None,
         metadata={
             "help": "Path to pretrained model or model identifier from huggingface.co/models"
         }
     )
     decoder_model_name_or_path: Optional[str] = field(
-        default="xlm-roberta-base",
+        default=None,
         metadata={
             "help": "Path to pretrained model or model identifier from huggingface.co/models"
         }
@@ -339,6 +339,19 @@ def main():
     encoder = model_args.encoder_model_name_or_path
     decoder = model_args.decoder_model_name_or_path
     model_name = model_args.model_name_or_path
+    if encoder is None and decoder is None:
+        if model_name == "../models/deit-xlmr":
+            encoder = "facebook/deit-base-distilled-patch16-224"
+            decoder = "xlm-roberta-base"
+        elif model_name == "../models/deit-marbert":
+            encoder = "facebook/deit-base-distilled-patch16-224"
+            decoder = "UBC-NLP/MARBERT"
+        elif model_name == "../models/deit-marbertv2":
+            encoder = "facebook/deit-base-distilled-patch16-224"
+            decoder = "UBC-NLP/MARBERTv2"
+        elif model_name == "../models/deit-arbert":
+            encoder = "facebook/deit-base-distilled-patch16-224"
+            decoder = "UBC-NLP/ARBERT"
     try: 
         encoder_split = encoder.split("/")[1]
         decoder_split = decoder.split('/')[1]
@@ -359,7 +372,7 @@ def main():
         per_device_eval_batch_size=train_args.per_device_eval_batch_size,
         fp16= is_available(),
         num_train_epochs=train_args.num_train_epochs,
-        report_to="wandb",
+        report_to=None,
         load_best_model_at_end=True,
         metric_for_best_model="cer",
         greater_is_better=False,
@@ -391,18 +404,18 @@ def main():
         processor = TrOCRProcessor.from_pretrained(model_name)
         model = VisionEncoderDecoderModel.from_pretrained(model_name)
 
-    #fn_kwargs = dict(
-    #    processor = processor,
-    #)
-    #df = dataset.map(preprocess,fn_kwargs=fn_kwargs,remove_columns=["id"])
+    fn_kwargs = dict(
+        processor = processor,
+    )
+    df = dataset.map(preprocess,fn_kwargs=fn_kwargs,remove_columns=["id"])
 
     # split dataset into train and test
-    #train_dataset = df['train']
+    train_dataset = df['train']
     #predict_dataset = df['test']
-    #eval_dataset = df['validation']
+    eval_dataset = df['validation']
 
-    df_train = pd.DataFrame(dataset['train'])
-    df_eval = pd.DataFrame(dataset['validation'])
+    #df_train = pd.DataFrame(dataset['train'])
+    #df_eval = pd.DataFrame(dataset['validation'])
     df_pred = pd.DataFrame(dataset['test'])
 
     # df_train = df_train.sample(frac=data_args.split)
@@ -415,15 +428,15 @@ def main():
 
     transformer = lambda x: x 
 
-    train_dataset = OCRDataset(df=df_train, 
-                               processor=processor, 
-                               max_target_length=128, 
-                               transforms=transformer)
+    #train_dataset = OCRDataset(df=df_train, 
+    #                           processor=processor, 
+    #                           max_target_length=128, 
+    #                           transforms=transformer)
 
-    eval_dataset = OCRDataset(df=df_eval,
-                              processor=processor,
-                              max_target_length=128,
-                              transforms=transformer)
+    #eval_dataset = OCRDataset(df=df_eval,
+    #                          processor=processor,
+    #                          max_target_length=128,
+    #                          transforms=transformer)
 
     predict_dataset = OCRDataset(df=df_pred, 
                                  processor=processor, 
@@ -449,8 +462,8 @@ def main():
         
     # set special tokens used for creating the decoder_input_ids from the labels
      
-    cer_metric = load_metric("cer")
-    wer_metric = load_metric("wer")
+    cer_metric = load_metric("cer.py")
+    wer_metric = load_metric("wer.py")
 
     def compute_metrics(pred):
         labels_ids = pred.label_ids

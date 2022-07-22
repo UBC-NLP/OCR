@@ -28,7 +28,7 @@ echo "Training started at $(date)"
 python train.py \
     --model_name_or_path microsoft/trocr-base-stage1  \
     --encoder_model_name_or_path facebook/deit-base-distilled-patch16-224 \
-    --decoder_model_name_or_path xlm-roberta-base \
+    --decoder_model_name_or_path UBC-NLP/MARBERTv2 \
     --dataset_name /home/ahsang/scratch/AraOCR_dataset \
     --dataset_config_name ADAB \
     --save_dir /home/ahsang/scratch/arocr/checkpoints/ \
@@ -37,7 +37,6 @@ python train.py \
     --per_device_train_batch_size 8 \
     --per_device_eval_batch_size 8 \
     --num_train_epochs 5 \
-    --learning_rate 4.5e-6 \
-
+    --learning_rate 4.5e-6
 
 echo "Training ended at $(date)"

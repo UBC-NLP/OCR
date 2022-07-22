@@ -18,7 +18,7 @@ import os
 from torch.utils.data import Dataset
 import pandas as pd
 
-wandb.init(project="arocr", entity="gagan3012", settings=wandb.Settings(start_method="fork"))
+wandb.init(project="arocr", entity="mahsanghani", settings=wandb.Settings(start_method="fork"))
 
 
 def preprocess(examples, processor, max_target_length=128):

@@ -38,7 +38,7 @@ echo "Training started at $(date)"
 
 python train.py \
     --model_name_or_path $model_name \
-    --dataset_name /home/gagan30/scratch/arocr/AraOCR_dataset \
+    --dataset_name /home/ahsang/scratch/AraOCR_dataset \
     --dataset_config_name $dataset \
     --save_dir ~/scratch/arocr/checkpoints/ \
     --output_dir ~/scratch/arocr/outputs \

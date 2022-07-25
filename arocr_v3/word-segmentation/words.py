@@ -117,7 +117,7 @@ def _text_detect(img, image, join=False):
     img_dilation = cv2.dilate(small, kernel, iterations=1)
     # print(11111111111111)
 
-    im2, cnt, hierarchy = cv2.findContours(np.copy(small),
+    cnt, hierarchy = cv2.findContours(np.copy(small),
                                            cv2.RETR_TREE,
                                            cv2.CHAIN_APPROX_SIMPLE)
     
@@ -164,7 +164,7 @@ def textDetectWatershed(thresh):
     """NOT IN USE - Text detection using watershed algorithm.
     Based on: http://docs.opencv.org/trunk/d3/db4/tutorial_py_watershed.html
     """
-    img = cv2.cvtColor(cv2.imread("test/n.jpg"),
+    img = cv2.cvtColor(cv2.imread("test.jpg"),
                        cv2.COLOR_BGR2RGB)
     print(img)
     img = resize(img, 3000)

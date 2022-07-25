@@ -10,8 +10,11 @@ import words
 from PIL import Image
 import cv2
 
-# User input page image 
-image = cv2.cvtColor(cv2.imread("test.jpg"), cv2.COLOR_BGR2RGB)
+# User input page image
+print(cv2.imread("/Users/ahsanghani/Documents/NLP/OCR/OCR/arocr_v3/word-segmentation/test.jpg"))
+print(cv2.imread("/Users/ahsanghani/Documents/NLP/OCR/OCR/arocr_v3/word-segmentation/test.jpg").shape)
+
+image = cv2.cvtColor(cv2.imread("/Users/ahsanghani/Documents/NLP/OCR/OCR/arocr_v3/word-segmentation/test.jpg"), cv2.COLOR_BGR2RGB)
 
 # Crop image and get bounding boxes
 crop = page.detection(image)

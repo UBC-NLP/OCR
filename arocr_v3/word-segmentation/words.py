@@ -14,14 +14,13 @@ def detection(image, join=False):
     Return: numpy array of bounding boxes [x, y, x+w, y+h]
     """
     # Preprocess image for word detection
-    blurred = cv2.GaussianBlur(image, (5, 5), 18)
+    blurred = cv2.GaussianBlur(image, (5, 5), 8)
     edge_img = _edge_detect(blurred)
     ret, edge_img = cv2.threshold(edge_img, 50, 255, cv2.THRESH_BINARY)
     bw_img = cv2.morphologyEx(edge_img, cv2.MORPH_CLOSE,
                               np.ones((15,15), np.uint8))
 
     return _text_detect(bw_img, image, join)
-
 
 def sort_words(boxes):
     """Sort boxes - (x, y, x+w, y+h) from left to right, top to bottom."""
@@ -164,8 +163,7 @@ def textDetectWatershed(thresh):
     """NOT IN USE - Text detection using watershed algorithm.
     Based on: http://docs.opencv.org/trunk/d3/db4/tutorial_py_watershed.html
     """
-    img = cv2.cvtColor(cv2.imread("test.jpg"),
-                       cv2.COLOR_BGR2RGB)
+    img = cv2.cvtColor(cv2.imread("test.jpg"), cv2.COLOR_BGR2GRAY)
     print(img)
     img = resize(img, 3000)
     thresh = resize(thresh, 3000)

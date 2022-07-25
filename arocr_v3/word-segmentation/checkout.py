@@ -22,15 +22,15 @@ boxes = words.detection(crop)
 lines = words.sort_words(boxes)
 
 # Saving the bounded words from the page image in sorted way
-i = 0
-for line in lines:
-    text = crop.copy()
-    for (x1, y1, x2, y2) in line:
-        # roi = text[y1:y2, x1:x2]
-        save = Image.fromarray(text[y1:y2, x1:x2])
-        # print(i)
-        save.save("segmented/segment" + str(i) + ".png")
-        i += 1
+# i = 0
+# for line in lines:
+#     text = crop.copy()
+#     for (x1, y1, x2, y2) in line:
+#         # roi = text[y1:y2, x1:x2]
+#         save = Image.fromarray(text[y1:y2, x1:x2])
+#         # print(i)
+#         save.save("segmented/segment" + str(i) + ".png")
+#         i += 1
 
 
 

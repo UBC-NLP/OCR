@@ -112,7 +112,7 @@ def _text_detect(img, image, join=False):
     
     # Finding contours
     # mask = np.zeros(small.shape, np.uint8)
-    kernel = np.ones((5, 100), np.uint16)  ### (5, 100) for line segmention  (5,30) for word segmentation
+    kernel = np.ones((5, 30), np.uint16)  ### (5, 100) for line segmention  (5,30) for word segmentation
     img_dilation = cv2.dilate(small, kernel, iterations=1)
     # print(11111111111111)
 

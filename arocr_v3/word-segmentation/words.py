@@ -15,7 +15,8 @@ def detection(image, join=False):
     """
     # Preprocess image for word detection
     blurred = cv2.GaussianBlur(image, (5, 5), 8)
-    edge_img = _edge_detect(blurred)
+    dilated = cv2.dilate(blurred, np.ones((5, 5), np.uint8))
+    edge_img = _edge_detect(dilated)
     ret, edge_img = cv2.threshold(edge_img, 50, 255, cv2.THRESH_BINARY)
     bw_img = cv2.morphologyEx(edge_img, cv2.MORPH_CLOSE,
                               np.ones((5, 5), np.uint8))

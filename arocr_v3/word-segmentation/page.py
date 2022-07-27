@@ -4,7 +4,6 @@ Crop background and transform perspective from the photo of page
 """
 import numpy as np
 import cv2
-
 from utils import *
 
 def detection(image):
@@ -64,9 +63,7 @@ def _contour_offset(cnt, offset):
 
 def _find_page_contours(edges, img):
     """Finding corner points of page contour."""
-    im2, contours, hierarchy = cv2.findContours(edges,
-                                                cv2.RETR_TREE,
-                                                cv2.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     
     # Finding biggest rectangle otherwise return original corners
     height = edges.shape[0]

@@ -117,10 +117,8 @@ def _text_detect(img, image, join=False):
     img_dilation = cv2.dilate(small, kernel, iterations=1)
     # print(11111111111111)
 
-    cnt, hierarchy = cv2.findContours(np.copy(small),
-                                           cv2.RETR_TREE,
-                                           cv2.CHAIN_APPROX_SIMPLE)
-    
+    cnt, hierarchy = cv2.findContours(np.copy(small), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
     index = 0    
     boxes = []
     # Go through all contours in top level
@@ -153,12 +151,9 @@ def _text_detect(img, image, join=False):
         cv2.rectangle(small, (x, y),(x+w,y+h), (0, 255, 0), 2)
         bounding_boxes = np.vstack((bounding_boxes,
                                     np.array([x, y, x+w, y+h])))
-        
-    implt(small, t='Bounding rectangles')
-    
     boxes = bounding_boxes.dot(ratio(image, small.shape[0])).astype(np.int64)
-    return boxes[1:]  
-    
+    return boxes[1:]
+
 
 def textDetectWatershed(thresh):
     """NOT IN USE - Text detection using watershed algorithm.

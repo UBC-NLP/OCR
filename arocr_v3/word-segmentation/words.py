@@ -15,7 +15,8 @@ def detection(image, join=False):
     """
     # Preprocess image for word detection
     blurred = cv2.GaussianBlur(image, (5, 5), 8)
-    edge_img = _edge_detect(blurred)
+    dilated = cv2.dilate(blurred, np.ones((5, 5), np.uint8))
+    edge_img = _edge_detect(dilated)
     ret, edge_img = cv2.threshold(edge_img, 50, 255, cv2.THRESH_BINARY)
     bw_img = cv2.morphologyEx(edge_img, cv2.MORPH_CLOSE,
                               np.ones((5, 5), np.uint8))
@@ -112,14 +113,12 @@ def _text_detect(img, image, join=False):
     
     # Finding contours
     # mask = np.zeros(small.shape, np.uint8)
-    kernel = np.ones((5, 100), np.uint16)  ### (5, 100) for line segmention  (5,30) for word segmentation
+    kernel = np.ones((5, 30), np.uint16)  ### (5, 100) for line segmention  (5,30) for word segmentation
     img_dilation = cv2.dilate(small, kernel, iterations=1)
     # print(11111111111111)
 
-    cnt, hierarchy = cv2.findContours(np.copy(small),
-                                           cv2.RETR_TREE,
-                                           cv2.CHAIN_APPROX_SIMPLE)
-    
+    cnt, hierarchy = cv2.findContours(np.copy(small), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
     index = 0    
     boxes = []
     # Go through all contours in top level
@@ -152,12 +151,9 @@ def _text_detect(img, image, join=False):
         cv2.rectangle(small, (x, y),(x+w,y+h), (0, 255, 0), 2)
         bounding_boxes = np.vstack((bounding_boxes,
                                     np.array([x, y, x+w, y+h])))
-        
-    implt(small, t='Bounding rectangles')
-    
     boxes = bounding_boxes.dot(ratio(image, small.shape[0])).astype(np.int64)
-    return boxes[1:]  
-    
+    return boxes[1:]
+
 
 def textDetectWatershed(thresh):
     """NOT IN USE - Text detection using watershed algorithm.

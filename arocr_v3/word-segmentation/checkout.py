@@ -14,7 +14,7 @@ import cv2
 print(cv2.imread("/Users/ahsanghani/Documents/NLP/OCR/OCR/arocr_v3/word-segmentation/test.jpg"))
 print(cv2.imread("/Users/ahsanghani/Documents/NLP/OCR/OCR/arocr_v3/word-segmentation/test.jpg").shape)
 
-image = cv2.cvtColor(cv2.imread("/Users/ahsanghani/Documents/NLP/OCR/OCR/arocr_v3/word-segmentation/test6.jpg"), cv2.COLOR_BGR2RGB)
+image = cv2.cvtColor(cv2.imread("/Users/ahsanghani/Documents/NLP/OCR/OCR/arocr_v3/word-segmentation/test5.jpg"), cv2.COLOR_BGR2RGB)
 
 # Crop image and get bounding boxes
 crop = page.detection(image)

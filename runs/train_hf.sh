@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --time=3:00:00
+#SBATCH --time=10:00:00
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=64G
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:4
 #SBATCH --account=rrg-mageed
 #SBATCH --job-name=train_hf_v2
 #SBATCH --output=train_hf_v2.out
@@ -38,7 +38,7 @@ echo "Training started at $(date)"
 
 python train.py \
    --model_name_or_path $model_name \
-   --dataset_name /home/ahsang/scratch/AraOCR_dataset \
+   --dataset_name /project/6005442/DataBank/ocr-project/AraOCR_dataset \
    --dataset_config_name $dataset \
    --output_dir ~/scratch/arocr/results \
    --cache_dir ~/scratch/arocr/cache/ \

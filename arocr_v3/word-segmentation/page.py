@@ -9,12 +9,12 @@ from utils import *
 def detection(image):
     """Finding Page."""
     # Edge detection
-    image_edges = _edges_detection(image, 200, 250)
+    image_edges = _edges_detection(image, 0, 0)
     
     # Close gaps between edges (double page clouse => rectangle kernel)
     closed_edges = cv2.morphologyEx(image_edges, 
                                     cv2.MORPH_CLOSE, 
-                                    np.ones((5, 11)))
+                                    np.ones((5, 5)))
     # Countours
     page_contour = _find_page_contours(closed_edges, resize(image))
     # Recalculate to original scale

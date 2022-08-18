@@ -1,4 +1,3 @@
-from operator import contains
 from datasets import load_metric, load_dataset
 from transformers import (
     TrOCRProcessor,
@@ -25,11 +24,24 @@ from IPython.core.display import HTML
 
 #wandb.init(project="arocr", entity="gagan3012", settings=wandb.Settings(start_method="fork"))
 
+from PIL import Image, ImageOps
 
-def preprocess(examples, processor, max_target_length=256):
+
+def resize_with_padding(img, expected_size=(1920, 2560)):
+    expected_size = img.size[0]*2, img.size[0]*2
+    img.thumbnail((expected_size[0], expected_size[1]))
+    delta_width = expected_size[0] - img.size[0]
+    delta_height = expected_size[1] - img.size[1]
+    pad_width = delta_width // 2
+    pad_height = delta_height // 2
+    padding = (pad_width, pad_height, delta_width -
+               pad_width, delta_height - pad_height)
+    return ImageOps.expand(img, padding, fill="white")
+
+def preprocess(examples, processor, max_target_length=512):
     text = examples["text"]
     image = examples["image"].convert("RGB")
-    image = image.resize((224, 224))
+    image = resize_with_padding(image)
     pixel_values = processor(image, return_tensors="pt").pixel_values
     labels = processor.tokenizer(
         text, padding="max_length", max_length=max_target_length
@@ -313,8 +325,8 @@ def main():
     decoder = model_args.decoder_model_name_or_path
     model_name = model_args.model_name_or_path
     if encoder is None and decoder is None:
-        encoder_split = "deit-base"
-        decoder_split = "arbert-finetune"
+        encoder_split = "trocr"
+        decoder_split = "finetune"
     else: 
         encoder_split="encoder"
         decoder_split="decoder"
@@ -352,7 +364,7 @@ def main():
     dataset = load_dataset(
         data_args.dataset_name,
         data_args.dataset_config_name,
-        cache_dir=model_args.cache_dir,
+        #cache_dir=model_args.cache_dir,
     )
 
     if model_args.use_encoder_decoder:
@@ -387,7 +399,7 @@ def main():
 
     # set beam search parameters
     model.config.eos_token_id = processor.tokenizer.sep_token_id
-    model.config.max_length = 128
+    model.config.max_length = 256
     model.config.early_stopping = True
     model.config.no_repeat_ngram_size = 3
     model.config.length_penalty = 2.0
@@ -439,15 +451,15 @@ def main():
     )
 
     print("Training model")
-    #train_result = trainer.train()
-    #metrics = train_result.metrics
-    #trainer.log_metrics("train", metrics)
-    #trainer.save_metrics("train", metrics)
-    # trainer.save_state()
-    # print("Evaluating model")
-    # metrics = trainer.evaluate(metric_key_prefix="eval")
-    # trainer.log_metrics("eval", metrics)
-    # trainer.save_metrics("eval", metrics)
+    train_result = trainer.train()
+    metrics = train_result.metrics
+    trainer.log_metrics("train", metrics)
+    trainer.save_metrics("train", metrics)
+    trainer.save_state()
+    print("Evaluating model")
+    metrics = trainer.evaluate(metric_key_prefix="eval")
+    trainer.log_metrics("eval", metrics)
+    trainer.save_metrics("eval", metrics)
     print("Predicting")
     predict_results = trainer.predict(
         predict_dataset,
